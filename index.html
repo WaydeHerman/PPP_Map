@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Loan Map</title>
+    <style>
+      @import url(//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.5/leaflet.css);
+
+      body {
+        margin: 0;
+      }
+      .charts {
+        margin: 0 24px;
+        display: grid;
+        grid-template-rows: repeat(auto-fill, minmax(400px, 1fr));
+        grid-gap: 10px;
+      }
+
+      .chart {
+        margin-bottom: 24px;
+      }
+
+
+    </style>
+    <link
+      href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="loan-map-viz.css" />
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.5/leaflet.js"></script>
+    <script src="leaflet-heat.js"></script>
+      
+    <link
+      href="https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <script src="loan-map-viz.js"></script>
+      <script
+    src="https://kit.fontawesome.com/ea2379d57d.js"
+    crossorigin="anonymous"
+  ></script>
+  </head>
+
+  <body>
+    <div class="charts">
+      <div class="chart"></div>
+    </div>
+
+    <script>
+        const file_path_data = "files_for_ppp_map/foia_150k_plus_small.csv";
+        const file_path_industry_json = "industry_json.json";
+        const file_path_industries_sectors = "files_for_ppp_map/industry_sectors.csv";
+        const zip_json = "zip_codes.json"
+
+        d3.csv(file_path_data).then(function(data) {
+            d3.json(file_path_industry_json).then(function(industry_json) {
+                d3.csv(file_path_industries_sectors).then(function(sectors) {
+                    d3.json(zip_json).then(function(zip_json) {
+                    loanMap({
+                        el: document.body,
+                        data: data,
+                        zip_json: zip_json,
+                        industry_json: industry_json,
+                        sectors: sectors,
+                        height: "",
+                        width: ""
+                        });
+                    })
+                })
+            })
+        })
+
+    
+    </script>
+  </body>
+</html>

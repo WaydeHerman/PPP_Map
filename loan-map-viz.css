@@ -1,0 +1,386 @@
+.loan-map-viz {
+  font-family: "Nunito", sans-serif;
+  font-size: 1em;
+}
+
+.migration-map-viz * {
+  box-sizing: border-box;
+}
+
+.county {
+  stroke: black;
+  stroke-width: 1px;
+  fill-opacity: 0.7;
+}
+
+.feature-line {
+  fill: none;
+  cursor: pointer;
+}
+
+.feature-circle {
+  cursor: pointer;
+  fill: #a24936;
+}
+
+#images {
+  left: 0px;
+  top: 0px;
+  position: absolute;
+  margin-top: 0px;
+  width: 100vw;
+  height: 100vh;
+}
+
+.stats-label {
+  color: white;
+  font-size: 1.2em;
+  font-weight: bold;
+  top: 10px;
+  left: 10px;
+  position: relative;
+}
+
+.stats-toggle {
+  color: white;
+  font-size: 1.2em;
+  top: -10px;
+  left: 360px;
+  position: relative;
+  cursor: pointer;
+  border: none;
+}
+
+.stats-bar-container {
+  width: 380px;
+  margin: 10px;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.stats-bar-container:hover {
+  overflow-y: scroll;
+}
+
+/* width */
+.stats-bar-container::-webkit-scrollbar {
+  width: 6px;
+  left: 10px;
+}
+
+/* Track */
+.stats-bar-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+.stats-bar-container::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+.stats-bar-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.stats-label-drill {
+  color: white;
+  top: 15px;
+  position: relative;
+  left: 10px;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+.bar-label-value-alt {
+  fill: white;
+  font-weight: bold;
+  opacity: 0;
+}
+
+.bar-label-value-neg {
+  font-weight: bold;
+  fill: white;
+}
+
+.bar-label-value-neg-alt {
+  font-weight: bold;
+  fill: white;
+  opacity: 0;
+  text-anchor: end;
+}
+
+.bar-label-value {
+  fill: white;
+  text-anchor: end;
+  font-weight: bold;
+}
+.bar-label-perc,
+.bar-label {
+  fill: white;
+  font-size: 13px;
+}
+
+.legend-container {
+  width: 400px;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  position: relative;
+}
+
+.legend-header {
+  border-bottom: 1px solid white;
+  height: 90px;
+}
+
+.legend-sub-header {
+  height: 110px;
+  border-bottom: 1px solid white;
+}
+
+.legend-text {
+  fill: white;
+  font-weight: bold;
+}
+
+.legend-title {
+  color: white;
+  font-size: 1.4em;
+  position: relative;
+  opacity: 0.8;
+  top: 10px;
+  left: 10px;
+}
+
+.legend-area-title {
+  color: white;
+  font-size: 1.2em;
+  top: 15px;
+  left: 10px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.legend-axis {
+  stroke: white;
+  stroke-width: 1px;
+  stroke-dasharray: 5, 5;
+  fill: none;
+}
+
+.flow-picker-container {
+  position: relative;
+  top: 30px;
+  left: -5px;
+}
+
+.map-type-picker-container {
+  position: relative;
+  top: 30px;
+  left: -5px;
+}
+
+.dropdown-map-type {
+  margin: auto;
+  position: relative;
+  float: right;
+  top: -35px;
+  left: 160px;
+  display: inline-block;
+  max-width: 170px;
+}
+
+.flow-picker-text {
+  color: white;
+  display: inline-block;
+  position: relative;
+  left: 10px;
+}
+
+.node-info-container {
+  border-top: 1px solid white;
+  font-size: 13px;
+}
+
+.node-info {
+  color: white;
+  padding: 10px;
+  padding-bottom: 0px;
+}
+
+.node-value {
+  color: white;
+  font-weight: bold;
+  padding: 10px;
+  padding-bottom: 0px;
+}
+
+.node-info-link {
+  color: #2f61a2;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 10px;
+  padding-bottom: 0px;
+}
+
+.node-info-toggle {
+  color: white;
+  top: 10px;
+  position: relative;
+  left: 360px;
+  cursor: pointer;
+  display: inline-block;
+  border: none;
+  font-size: 1.2em;
+}
+
+/* Dropdown Button */
+.dropbtn {
+  background-color: transparent;
+  border: 1px solid #747474;
+  color: #a2a2a2;
+  padding: 5px;
+  padding-left: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 140px;
+  text-align: left;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown-flow {
+  margin: auto;
+  position: relative;
+  float: right;
+  top: -75px;
+  left: 20px;
+  display: inline-block;
+  min-width: 160px;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #171717;
+  font-size: 14px;
+  min-width: 140px;
+  z-index: 1;
+  max-height: 530px;
+  overflow: auto;
+  top: 28px;
+}
+
+.dropbtn-icon {
+  border: none;
+  float: right;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: #a2a2a2 !important;
+  font-size: 14px;
+  padding: 3px 0px;
+  padding-left: 10px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown-map-type:hover .dropdown-content,
+.dropdown-flow:hover .dropdown-content {
+  display: block;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown-map-type:hover .dropbtn,
+.dropdown-flow:hover .dropbtn {
+  background-color: #132a54;
+}
+
+i {
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 2px;
+  margin-left: 10px;
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+.export-option-container {
+  margin: auto;
+  position: relative;
+  float: right;
+  top: 10px;
+  left: -30px;
+  display: inline-block;
+}
+
+.legend-svg {
+  margin: auto;
+  position: relative;
+  top: 10px;
+  left: 100px;
+  display: inline-block;
+}
+
+.export-option-title {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding-left: 5px;
+}
+
+.export-option {
+  color: #119eb9;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 5px;
+  padding-top: 3px;
+  padding-bottom: 0px;
+}
+
+.chart-tooltip {
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  padding: 0.25em 0.5em;
+  border-width: 2px;
+  border-style: solid;
+  background: rgba(255, 255, 255, 0.95);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.highlighted {
+  color: #ffcb47;
+}
+
+.chart-tooltip .tooltip-desc,
+.chart-tooltip .tooltip-total,
+.tooltip-percentage {
+  color: #a6a6a6;
+}
+
+.chart-tooltip .tooltip-value {
+  color: #a6a6a6;
+}
+
+.triangle-down {
+  width: 0;
+  height: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-top: 50px solid white;
+}

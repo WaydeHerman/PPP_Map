@@ -1,0 +1,1 @@
+function loanMap(option) {}
