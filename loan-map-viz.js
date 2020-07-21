@@ -8,8 +8,21 @@ function loanMap(option) {
   const zip_json = option.zip_json;
   const industry_json = option.industry_json;
 
+  console.log(data);
+
+  test = d3
+    .nest()
+    .key(function (d) {
+      return d.LoanRange;
+    })
+    .entries(data);
+
+  console.log("test", test);
+
   var point_width = 4;
-  var heatData, json_copy, bounds_NE, bounds_SW;
+  var filter = "All Sectors";
+  var list_of_naicscodes = [];
+  var heatData, json_copy, bounds_NE, bounds_SW, featureCircle;
 
   const container = d3.select(el).classed("migration-map-viz", true);
   container.append("p").attr("id", "map");
@@ -60,21 +73,16 @@ function loanMap(option) {
   function plot() {
     document.getElementsByClassName("leaflet-zoom-hide").innerHTML = "";
     d3.selectAll(".feature-circle").remove();
-    heatData = [];
     json_copy = JSON.parse(JSON.stringify(zip_json));
 
     // get coordinates for points
-    heatData = [];
+
     data.forEach(function (v) {
       if (zip_json[+v.Zip]) {
         v.location = [zip_json[+v.Zip][0], zip_json[+v.Zip][1]];
         v.point = map.latLngToLayerPoint(
           new L.LatLng(v.location[0], v.location[1])
         );
-        var tmp_val = doStuff(v.location[1], v.location[0]);
-        //tmp_val.push(Math.random() * 0.1);
-        tmp_val.push(1);
-        heatData.push(tmp_val);
       }
     });
 
@@ -84,12 +92,12 @@ function loanMap(option) {
 
     // process heat data
 
-    featureCircle = g
+    /*featureCircle = g
       .selectAll(".feature-circle")
       .data(data)
       .enter()
       .append("circle")
-      .attr("class", "feature-circle");
+      .attr("class", "feature-circle");*/
   }
 
   plot();
@@ -162,7 +170,7 @@ function loanMap(option) {
       return "<a href='#'>" + d + "</a>";
     })
     .on("click", function (d) {
-      var list_of_naicscodes;
+      filter = d;
       sectors_object.forEach(function (v) {
         if (v.key == d) {
           // this is the chosen sector
@@ -171,7 +179,8 @@ function loanMap(option) {
           });
         }
       });
-      featureCircle.style("display", function (w) {
+      reset();
+      /*featureCircle.style("display", function (w) {
         if (d == "All Sectors") {
           return "block";
         } else {
@@ -181,14 +190,8 @@ function loanMap(option) {
             return "none";
           }
         }
-      });
+      });*/
     });
-
-  var legendColorScale = d3
-    .scaleLinear()
-    .domain([65, 0])
-    .interpolate(d3.interpolateHslLong)
-    .range(["blue", "red"]);
 
   var legendSubHeader = legendContainer
     .append("div")
@@ -197,19 +200,29 @@ function loanMap(option) {
   var legendSVG = legendSubHeader
     .append("svg")
     .style("position", "relative")
-    .attr("width", 140)
+    .attr("width", 180)
     .attr("height", 95);
 
   var legend_examples = [0, 1, 2, 3, 4];
   var colors = ["#FFAC81", "#FF928B", "#FEC3A6", "#EFE9AE", "#CDEAC0"];
+  var loan_range = [
+    "$150,000-350,000",
+    "$350,000-1 million",
+    "$1-2 million",
+    "$2-5 million",
+    "$5-10 million",
+  ];
+
+  var legendColorScale = d3.scaleOrdinal().domain(loan_range).range(colors);
 
   legendSVG
     .selectAll(".legend-bars")
     .data(legend_examples)
     .enter()
     .append("rect")
+    .attr("class", "legend-bars")
     .attr("y", function (d) {
-      return d * 10 + 25;
+      return d * 15 + 25;
     })
     .attr("fill", function (d) {
       return colors[d];
@@ -218,15 +231,51 @@ function loanMap(option) {
     .attr("width", 30)
     .attr("height", 10);
 
+  legendSVG
+    .selectAll(".legend-bars-label")
+    .data(legend_examples)
+    .enter()
+    .append("text")
+    .attr("class", "legend-bars-label")
+    .attr("y", function (d) {
+      return d * 15 + 34;
+    })
+    .attr("x", 75)
+    .text(function (d) {
+      return loan_range[d];
+    });
+
   function reset() {
     bounds_NE = map.getBounds()._northEast;
     bounds_SW = map.getBounds()._southWest;
-    featureCircle.style("display", "none");
-    data.forEach(function (v) {
+    if (featureCircle != null) {
+      featureCircle.remove();
+    }
+
+    filtered_data = data.filter(function (v) {
+      return (
+        list_of_naicscodes.indexOf(+v.NAICSCode) >= 0 || filter == "All Sectors"
+      );
+    });
+
+    console.log("filtered_data", filtered_data);
+
+    heatData = [];
+    filtered_data.forEach(function (v) {
       v.point = map.latLngToLayerPoint(
         new L.LatLng(v.location[0], v.location[1])
       );
+      var tmp_val = doStuff(v.location[1], v.location[0]);
+      tmp_val.push(1);
+      heatData.push(tmp_val);
     });
+
+    featureCircle = g
+      .selectAll(".feature-circle")
+      .data(filtered_data)
+      .enter()
+      .append("circle")
+      .attr("class", "feature-circle");
 
     var bounds = path.bounds(),
       topLeft = [
@@ -282,6 +331,9 @@ function loanMap(option) {
           } else {
             return "none";
           }
+        })
+        .attr("fill", function (d) {
+          return legendColorScale(d.LoanRange);
         })
         .attr("cx", function (d) {
           return d.point.x;
