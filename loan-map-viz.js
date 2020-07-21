@@ -8,11 +8,8 @@ function loanMap(option) {
   const zip_json = option.zip_json;
   const industry_json = option.industry_json;
 
-  console.log("data", data);
-
-  var mapType = "Heatmap";
   var point_width = 4;
-  var heatData, json_copy;
+  var heatData, json_copy, bounds_NE, bounds_SW;
 
   const container = d3.select(el).classed("migration-map-viz", true);
   container.append("p").attr("id", "map");
@@ -60,19 +57,24 @@ function loanMap(option) {
   var transform = d3.geoTransform({ point: projectPoint }),
     path = d3.geoPath().projection(transform);
 
-  console.log("sectors", sectors);
-
   function plot() {
+    document.getElementsByClassName("leaflet-zoom-hide").innerHTML = "";
+    d3.selectAll(".feature-circle").remove();
     heatData = [];
     json_copy = JSON.parse(JSON.stringify(zip_json));
 
     // get coordinates for points
+    heatData = [];
     data.forEach(function (v) {
       if (zip_json[+v.Zip]) {
         v.location = [zip_json[+v.Zip][0], zip_json[+v.Zip][1]];
         v.point = map.latLngToLayerPoint(
           new L.LatLng(v.location[0], v.location[1])
         );
+        var tmp_val = doStuff(v.location[1], v.location[0]);
+        //tmp_val.push(Math.random() * 0.1);
+        tmp_val.push(1);
+        heatData.push(tmp_val);
       }
     });
 
@@ -92,6 +94,10 @@ function loanMap(option) {
 
   plot();
   map.on("viewreset", reset);
+
+  map.on("dragend", function (e) {
+    reset();
+  });
 
   reset();
 
@@ -147,8 +153,6 @@ function loanMap(option) {
 
   sectors_array.unshift("All Sectors");
 
-  console.log("sectors_object", sectors_object);
-
   d3.select("#flow-selector")
     .selectAll("a")
     .data(sectors_array)
@@ -167,7 +171,6 @@ function loanMap(option) {
           });
         }
       });
-      console.log(list_of_naicscodes);
       featureCircle.style("display", function (w) {
         if (d == "All Sectors") {
           return "block";
@@ -181,7 +184,44 @@ function loanMap(option) {
       });
     });
 
+  var legendColorScale = d3
+    .scaleLinear()
+    .domain([65, 0])
+    .interpolate(d3.interpolateHslLong)
+    .range(["blue", "red"]);
+
+  var legendSubHeader = legendContainer
+    .append("div")
+    .attr("class", "legend-sub-header");
+
+  var legendSVG = legendSubHeader
+    .append("svg")
+    .style("position", "relative")
+    .attr("width", 140)
+    .attr("height", 95);
+
+  var legend_examples = [0, 1, 2, 3, 4];
+  var colors = ["#FFAC81", "#FF928B", "#FEC3A6", "#EFE9AE", "#CDEAC0"];
+
+  legendSVG
+    .selectAll(".legend-bars")
+    .data(legend_examples)
+    .enter()
+    .append("rect")
+    .attr("y", function (d) {
+      return d * 10 + 25;
+    })
+    .attr("fill", function (d) {
+      return colors[d];
+    })
+    .attr("x", 35)
+    .attr("width", 30)
+    .attr("height", 10);
+
   function reset() {
+    bounds_NE = map.getBounds()._northEast;
+    bounds_SW = map.getBounds()._southWest;
+    featureCircle.style("display", "none");
     data.forEach(function (v) {
       v.point = map.latLngToLayerPoint(
         new L.LatLng(v.location[0], v.location[1])
@@ -206,35 +246,11 @@ function loanMap(option) {
       }),
     ];
 
-    /*
-        top left [26, -284]
-        bottom right [1218, 671]
-      */
-
-    console.log("topLeft", topLeft);
-    console.log("bottomRight", bottomRight);
-
     map.eachLayer(function (d) {
       if (d._heat) {
         map.removeLayer(d);
       }
     });
-
-    if (mapType !== "Heatmap") {
-      map.eachLayer(function (d) {
-        if (d._heat) {
-          map.removeLayer(d);
-        }
-      });
-    }
-
-    if (mapType === "Heatmap") {
-      var heat = L.heatLayer(heatData, {
-        maxZoom: 11,
-        minOpacity: 0.2,
-        radius: 20,
-      }).addTo(map);
-    }
 
     svg
       .attr("width", bottomRight[0] - topLeft[0] + 100)
@@ -244,20 +260,42 @@ function loanMap(option) {
 
     g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
 
-    featureCircle
-      .attr("opacity", 1)
-      .attr("cx", function (d) {
-        return d.point.x;
-      })
-      .attr("cy", function (d) {
-        return d.point.y;
-      })
-      .attr("r", point_width)
-      .on("mouseover", function (d) {
-        elementMouseOver(d);
-      })
-      .on("mousemove", moveTooltip)
-      .on("mouseout", elementMouseOut);
+    if (map._zoom < 7) {
+      var heat = L.heatLayer(heatData, {
+        maxZoom: 11,
+        minOpacity: 0.2,
+        radius: 20,
+      }).addTo(map);
+    }
+
+    if (map._zoom >= 7) {
+      featureCircle
+        .attr("opacity", 1)
+        .style("display", function (d) {
+          if (
+            d.location[0] < bounds_NE.lat &&
+            d.location[0] > bounds_SW.lat &&
+            d.location[1] < bounds_NE.lng &&
+            d.location[1] > bounds_SW.lng
+          ) {
+            return "block";
+          } else {
+            return "none";
+          }
+        })
+        .attr("cx", function (d) {
+          return d.point.x;
+        })
+        .attr("cy", function (d) {
+          return d.point.y;
+        })
+        .attr("r", point_width)
+        .on("mouseover", function (d) {
+          elementMouseOver(d);
+        })
+        .on("mousemove", moveTooltip)
+        .on("mouseout", elementMouseOut);
+    }
   }
 
   // Tooltip
@@ -299,6 +337,27 @@ function loanMap(option) {
 
     const { width, height } = tooltip.node().getBoundingClientRect();
     tooltip.datum({ width, height });
+  }
+
+  function doStuff(x, y) {
+    //console.log(e.latlng);
+    // coordinates in tile space
+    //var x = e.layerPoint.x;
+    //var y = e.layerPoint.y;
+    //console.log([x, y]);
+
+    // calculate point in xy space
+    var pointXY = L.point(x, y);
+    //console.log("Point in x,y space: " + pointXY);
+
+    // convert to lat/lng space
+    var pointlatlng = map.layerPointToLatLng(pointXY);
+    // why doesn't this match e.latlng?
+    //console.log("Point in lat,lng space: " + pointlatlng);
+
+    var test = new L.LatLng(y, x);
+    //console.log(" test: " + test);
+    return [test.lat, test.lng];
   }
 
   function moveTooltip() {
