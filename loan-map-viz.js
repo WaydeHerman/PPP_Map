@@ -204,7 +204,7 @@ function loanMap(option) {
     .attr("height", 95);
 
   var legend_examples = [0, 1, 2, 3, 4];
-  var colors = ["#FFAC81", "#FF928B", "#FEC3A6", "#EFE9AE", "#CDEAC0"];
+  var colors = ["#540D6E", "#EE4266", "#FFD23F", "#3BCEAC", "#0EAD68"];
   var loan_range = [
     "$150,000-350,000",
     "$350,000-1 million",
