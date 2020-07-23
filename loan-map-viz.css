@@ -82,7 +82,9 @@
   background: #555;
 }
 
-.stats-label-drill {
+.stats-label-drill-3,
+.stats-label-drill-2,
+.stats-label-drill-1 {
   color: white;
   top: 15px;
   position: relative;

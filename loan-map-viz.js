@@ -22,7 +22,15 @@ function loanMap(option) {
   var point_width = 4;
   var filter = "All Sectors";
   var list_of_naicscodes = [];
-  var heatData, json_copy, bounds_NE, bounds_SW, featureCircle;
+  var statsOpen = 1;
+  var drill_key = [];
+  var heatData,
+    json_copy,
+    bounds_NE,
+    bounds_SW,
+    featureCircle,
+    global_drill_level,
+    global_key;
 
   const container = d3.select(el).classed("migration-map-viz", true);
   container.append("p").attr("id", "map");
@@ -107,8 +115,6 @@ function loanMap(option) {
     reset();
   });
 
-  reset();
-
   var legendContainer = d3
     .select("#map")
     .append("div")
@@ -180,6 +186,7 @@ function loanMap(option) {
         }
       });
       reset();
+      updateStats(global_key, global_drill_level);
       /*featureCircle.style("display", function (w) {
         if (d == "All Sectors") {
           return "block";
@@ -212,8 +219,11 @@ function loanMap(option) {
     "$2-5 million",
     "$5-10 million",
   ];
+  var loan_values = [0.015, 0.035, 0.1, 0.2, 1];
 
   var legendColorScale = d3.scaleOrdinal().domain(loan_range).range(colors);
+
+  loanHeatmapScale = d3.scaleOrdinal().domain(loan_range).range(loan_values);
 
   legendSVG
     .selectAll(".legend-bars")
@@ -245,6 +255,206 @@ function loanMap(option) {
       return loan_range[d];
     });
 
+  var statsContainer = legendContainer
+    .append("div")
+    .attr("class", "stats-container");
+
+  statsContainer.append("div").attr("class", "stats-label").text("Stats");
+
+  statsContainer
+    .append("div")
+    .attr("class", "stats-label-drill-1")
+    .html("")
+    .style("display", "none")
+    .on("click", function () {
+      updateStats("", 0);
+    });
+
+  statsContainer
+    .append("div")
+    .attr("class", "stats-label-drill-2")
+    .html("")
+    .style("display", "none")
+    .on("click", function () {
+      updateStats(drill_key[1], 1);
+    });
+
+  statsContainer
+    .append("div")
+    .attr("class", "stats-label-drill-3")
+    .html("")
+    .style("display", "none")
+    .on("click", function () {
+      updateStats(drill_key[2], 2);
+    });
+
+  statsContainer
+    .append("div")
+    .html("<i class='fas stats-toggle fa-chevron-up'></i>")
+    .on("click", function () {
+      if (statsOpen === 1) {
+        statsOpen = 0;
+        barSVG.style("display", "none");
+        d3.select(".stats-toggle").attr(
+          "class",
+          "fas stats-toggle fa-chevron-down"
+        );
+        d3.select(".stats-label-drill-1").style("display", "none");
+        d3.select(".stats-label-drill-2").style("display", "none");
+        d3.select(".stats-label-drill-3").style("display", "none");
+      } else {
+        statsOpen = 1;
+        barSVG.style("display", "block");
+        d3.select(".stats-toggle").attr(
+          "class",
+          "fas stats-toggle fa-chevron-up"
+        );
+        d3.select(".stats-label-drill-1").style("display", "block");
+        d3.select(".stats-label-drill-2").style("display", "block");
+        d3.select(".stats-label-drill-3").style("display", "block");
+      }
+    });
+
+  var barContainer = statsContainer
+    .append("div")
+    .attr("class", "stats-bar-container")
+    .style("height", window.innerHeight - 320 + "px");
+
+  barSVG = barContainer.append("svg").attr("width", 370);
+
+  updateStats("", 0);
+
+  reset();
+
+  function updateStats(key, drill_level) {
+    console.log("key", key);
+    console.log("drill_level", drill_level);
+    drill_key.push(key);
+    global_key = key;
+    global_drill_level = drill_level;
+    global_key = global_key.slice(0, drill_level + 1);
+    barSVG.selectAll("*").remove();
+
+    bar_data = d3
+      .nest()
+      .key(function (d) {
+        return d.State;
+      })
+      .key(function (d) {
+        return d.City;
+      })
+      .key(function (d) {
+        return d.Zip;
+      })
+      .entries(
+        data.filter(function (v) {
+          return (
+            list_of_naicscodes.indexOf(+v.NAICSCode) >= 0 ||
+            filter == "All Sectors"
+          );
+        })
+      );
+
+    console.log(bar_data);
+
+    if (drill_level == 0) {
+      results = bar_data;
+    } else {
+      if (drill_level == 1) {
+        bar_data.forEach(function (v) {
+          if (v.key == drill_key[1]) {
+            results = v.values;
+          }
+        });
+      } else {
+        if (drill_level == 2) {
+          bar_data.forEach(function (v) {
+            if (v.key == drill_key[1]) {
+              v.values.forEach(function (w) {
+                if (w.key == drill_key[2]) {
+                  results = w.values;
+                }
+              });
+            }
+          });
+        } else {
+          bar_data.forEach(function (v) {
+            if (v.key == drill_key[1]) {
+              v.values.forEach(function (w) {
+                if (w.key == drill_key[2]) {
+                  w.values.forEach(function (u) {
+                    if (u.key == drill_key[3]) {
+                      results = u.values;
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      }
+    }
+
+    if (drill_level == 0) {
+      d3.select(".stats-label-drill-1").style("display", "none").html("");
+      d3.select(".stats-label-drill-2").style("display", "none").html("");
+      d3.select(".stats-label-drill-3").style("display", "none").html("");
+      d3.select(".stats-toggle").style("top", "-10px");
+    } else {
+      if (drill_level == 1) {
+        d3.select(".stats-label-drill-1")
+          .style("display", "block")
+          .html("States > " + key);
+        d3.select(".stats-toggle").style("top", "-10px");
+        d3.select(".stats-label-drill-2").style("display", "none").html("");
+        d3.select(".stats-label-drill-3").style("display", "none").html("");
+      } else {
+        if (drill_level == 2) {
+          d3.select(".stats-label-drill-2")
+            .style("display", "block")
+            .html("Cities > " + key);
+          d3.select(".stats-toggle").style("top", "-10px");
+          d3.select(".stats-label-drill-3").style("display", "none").html("");
+        } else {
+          d3.select(".stats-label-drill-3")
+            .style("display", "block")
+            .html("Zip Code > " + key);
+          d3.select(".stats-toggle").style("top", "-10px");
+        }
+      }
+    }
+
+    var statsHeight = 20 + (5 + 20) * results.length;
+
+    barSVG
+      .selectAll(".bar-label")
+      .data(results)
+      .enter()
+      .append("text")
+      .attr("class", "bar-label")
+      .attr("x", 0)
+      .attr("y", function (d, i) {
+        return i * 25 + 15;
+      })
+      .text(function (d) {
+        return d.key;
+      })
+      .style("cursor", "pointer")
+      .on("click", function (d) {
+        if (drill_level === 0) {
+          updateStats(d.key, 1);
+        } else {
+          if (drill_level == 1) {
+            updateStats(d.key, 2);
+          } else {
+            if (drill_level == 2) {
+              updateStats(d.key, 3);
+            }
+          }
+        }
+      });
+  }
+
   function reset() {
     bounds_NE = map.getBounds()._northEast;
     bounds_SW = map.getBounds()._southWest;
@@ -266,7 +476,7 @@ function loanMap(option) {
         new L.LatLng(v.location[0], v.location[1])
       );
       var tmp_val = doStuff(v.location[1], v.location[0]);
-      tmp_val.push(1);
+      tmp_val.push(loanHeatmapScale(v.LoanRange));
       heatData.push(tmp_val);
     });
 
@@ -313,7 +523,7 @@ function loanMap(option) {
       var heat = L.heatLayer(heatData, {
         maxZoom: 11,
         minOpacity: 0.2,
-        radius: 20,
+        radius: 15,
       }).addTo(map);
     }
 
