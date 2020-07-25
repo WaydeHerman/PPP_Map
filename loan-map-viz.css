@@ -35,17 +35,15 @@
   color: white;
   font-size: 1.2em;
   font-weight: bold;
-  top: 10px;
-  left: 10px;
-  position: relative;
+  margin-top: 10px;
+  margin-left: 10px;
 }
 
 .stats-toggle {
   color: white;
   font-size: 1.2em;
-  top: -10px;
-  left: 360px;
-  position: relative;
+  float: right;
+  margin-right: 10px;
   cursor: pointer;
   border: none;
 }
@@ -59,6 +57,21 @@
 
 .stats-bar-container:hover {
   overflow-y: scroll;
+}
+
+.stats-drill-city {
+  margin-left: 10px;
+}
+
+.stats-drill-item {
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  width: 70px;
+  display: inline-block;
+  padding: 5px;
+  font-size: 1.2em;
+  border: 1px solid white;
 }
 
 /* width */
@@ -82,13 +95,19 @@
   background: #555;
 }
 
+.stats-label-drill-0 {
+  color: white;
+  display: inline-block;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
 .stats-label-drill-3,
 .stats-label-drill-2,
 .stats-label-drill-1 {
   color: white;
-  top: 15px;
-  position: relative;
-  left: 10px;
+  display: inline-block;
   font-size: 1.2em;
   cursor: pointer;
 }
@@ -252,9 +271,9 @@
 .dropdown-flow {
   margin: auto;
   position: relative;
-  float: right;
-  top: -45px;
-  left: 10px;
+    /* float: right; */
+    top: -25px;
+    left: 15px;
   display: inline-block;
   min-width: 160px;
 }

@@ -10,20 +10,12 @@ function loanMap(option) {
 
   console.log(data);
 
-  test = d3
-    .nest()
-    .key(function (d) {
-      return d.LoanRange;
-    })
-    .entries(data);
-
-  console.log("test", test);
-
   var point_width = 4;
   var filter = "All Sectors";
   var list_of_naicscodes = [];
   var statsOpen = 1;
   var drill_key = [];
+  var drill_type = "city";
   var heatData,
     json_copy,
     bounds_NE,
@@ -131,9 +123,9 @@ function loanMap(option) {
     .append("div")
     .attr("class", "legend-header");
 
-  legendHeader.append("div").attr("class", "legend-title").text("title");
+  legendHeader.append("div").attr("class", "legend-title").text("Main Street Recovery");
 
-  legendHeader.append("div").attr("class", "legend-area-title").text("");
+  legendHeader.append("div").attr("class", "legend-area-title").text("PPP Loan Distribution");
 
   var sectorPickerContainer = legendHeader
     .append("div")
@@ -232,12 +224,12 @@ function loanMap(option) {
     .append("rect")
     .attr("class", "legend-bars")
     .attr("y", function (d) {
-      return d * 15 + 25;
+      return d * 15 + 20;
     })
     .attr("fill", function (d) {
       return colors[d];
     })
-    .attr("x", 35)
+    .attr("x", 15)
     .attr("width", 30)
     .attr("height", 10);
 
@@ -248,9 +240,9 @@ function loanMap(option) {
     .append("text")
     .attr("class", "legend-bars-label")
     .attr("y", function (d) {
-      return d * 15 + 34;
+      return d * 15 + 29;
     })
-    .attr("x", 75)
+    .attr("x", 55)
     .text(function (d) {
       return loan_range[d];
     });
@@ -258,35 +250,6 @@ function loanMap(option) {
   var statsContainer = legendContainer
     .append("div")
     .attr("class", "stats-container");
-
-  statsContainer.append("div").attr("class", "stats-label").text("Stats");
-
-  statsContainer
-    .append("div")
-    .attr("class", "stats-label-drill-1")
-    .html("")
-    .style("display", "none")
-    .on("click", function () {
-      updateStats("", 0);
-    });
-
-  statsContainer
-    .append("div")
-    .attr("class", "stats-label-drill-2")
-    .html("")
-    .style("display", "none")
-    .on("click", function () {
-      updateStats(drill_key[1], 1);
-    });
-
-  statsContainer
-    .append("div")
-    .attr("class", "stats-label-drill-3")
-    .html("")
-    .style("display", "none")
-    .on("click", function () {
-      updateStats(drill_key[2], 2);
-    });
 
   statsContainer
     .append("div")
@@ -299,6 +262,7 @@ function loanMap(option) {
           "class",
           "fas stats-toggle fa-chevron-down"
         );
+        d3.select(".stats-label-drill-0").style("display", "none");
         d3.select(".stats-label-drill-1").style("display", "none");
         d3.select(".stats-label-drill-2").style("display", "none");
         d3.select(".stats-label-drill-3").style("display", "none");
@@ -309,11 +273,77 @@ function loanMap(option) {
           "class",
           "fas stats-toggle fa-chevron-up"
         );
-        d3.select(".stats-label-drill-1").style("display", "block");
-        d3.select(".stats-label-drill-2").style("display", "block");
-        d3.select(".stats-label-drill-3").style("display", "block");
+        d3.select(".stats-label-drill-0").style("display", "inline-block");
+        d3.select(".stats-label-drill-1").style("display", "inline-block");
+        d3.select(".stats-label-drill-2").style("display", "inline-block");
+        d3.select(".stats-label-drill-3").style("display", "inline-block");
       }
     });
+
+  statsContainer.append("div").attr("class", "stats-label").text("Stats");
+
+  statsContainer
+    .append("div")
+    .attr("class", "stats-label-drill-0")
+    .text("US")
+    .style("display", "none")
+    .on("click", function () {
+      updateStats("", 0);
+    });
+
+  statsContainer
+    .append("div")
+    .attr("class", "stats-label-drill-1")
+    .text("A")
+    .style("display", "none")
+    .on("click", function () {
+      updateStats("", 0);
+    });
+
+  statsContainer
+    .append("div")
+    .attr("class", "stats-label-drill-2")
+    .text("B")
+    .style("display", "none")
+    .on("click", function () {
+      updateStats(drill_key[1], 1);
+    });
+
+  statsContainer
+    .append("div")
+    .attr("class", "stats-label-drill-3")
+    .html("C")
+    .style("display", "none")
+    .on("click", function () {
+      updateStats(drill_key[2], 2);
+    });
+
+  var statsDrillToggle = statsContainer
+    .append("div")
+    .attr("class", "stats-drill-toggle")
+    
+  statsDrillToggle
+    .append("div")
+    .attr("class", "stats-drill-item stats-drill-city")
+    .style("background-color", "#0FAD68")
+    .html("By City")
+    .on("click", function() {
+      drill_type = "city"
+      d3.select(".stats-drill-zip").style("background-color", "transparent")
+      d3.select(".stats-drill-city").style("background-color", "#0FAD68")
+      updateStats(drill_key[1], 1);
+    })
+
+  statsDrillToggle
+    .append("div")
+    .attr("class", "stats-drill-item stats-drill-zip")
+    .html("By Zip")
+    .on("click", function() {
+      drill_type = "zip"
+      d3.select(".stats-drill-zip").style("background-color", "#0FAD68")
+      d3.select(".stats-drill-city").style("background-color", "transparent")
+      updateStats(drill_key[1], 1);
+    })
 
   var barContainer = statsContainer
     .append("div")
@@ -327,15 +357,19 @@ function loanMap(option) {
   reset();
 
   function updateStats(key, drill_level) {
-    console.log("key", key);
-    console.log("drill_level", drill_level);
     drill_key.push(key);
     global_key = key;
     global_drill_level = drill_level;
-    global_key = global_key.slice(0, drill_level + 1);
+    drill_key = drill_key.slice(0, drill_level + 1);
     barSVG.selectAll("*").remove();
 
-    bar_data = d3
+    console.log('key', key)
+    console.log('drill_level', drill_level)
+    console.log('filter', filter)
+    console.log('drill_type', drill_type)
+    console.log('drill_key', drill_key)
+
+    /*bar_data = d3
       .nest()
       .key(function (d) {
         return d.State;
@@ -353,78 +387,250 @@ function loanMap(option) {
             filter == "All Sectors"
           );
         })
-      );
+      );*/
 
-    console.log(bar_data);
+      var loan_range = [
+        "$150,000-350,000",
+        "$350,000-1 million",
+        "$1-2 million",
+        "$2-5 million",
+        "$5-10 million",
+      ];
+
+      var processed_data = data
 
     if (drill_level == 0) {
-      results = bar_data;
-    } else {
-      if (drill_level == 1) {
-        bar_data.forEach(function (v) {
-          if (v.key == drill_key[1]) {
-            results = v.values;
+      processed_data = processed_data.filter(function (v) {
+          if (filter == "All Sectors") {
+            return v
+          } else {
+            return (list_of_naicscodes.indexOf(+v.NAICSCode) >= 0);
           }
-        });
-      } else {
-        if (drill_level == 2) {
-          bar_data.forEach(function (v) {
-            if (v.key == drill_key[1]) {
-              v.values.forEach(function (w) {
-                if (w.key == drill_key[2]) {
-                  results = w.values;
-                }
-              });
-            }
-          });
+        })
+      bar_data = d3
+      .nest()
+      .key(function (d) {
+        return d.State;
+      })
+      .key(function (d) {
+        return d.LoanRange;
+      })
+      .sortKeys(function(a, b) {
+        return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
+      })
+      .entries(processed_data);
+
+      results = bar_data;
+      console.log('data', data)
+    } else {
+
+      if (drill_level == 1) {
+        processed_data = processed_data.filter(function (v) {
+          if (filter == "All Sectors") {
+            return v
+          } else {
+            return (list_of_naicscodes.indexOf(+v.NAICSCode) >= 0);
+          }
+        }).filter(function(v) {
+          return v.State == drill_key[1]
+        })
+
+        if (drill_type == "city") {
+          bar_data = d3
+          .nest()
+          .key(function (d) {
+            return d.City;
+          })
+          .key(function (d) {
+            return d.LoanRange;
+          })
+          .sortKeys(function(a, b) {
+            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
+          })
+          .entries(processed_data);
         } else {
-          bar_data.forEach(function (v) {
-            if (v.key == drill_key[1]) {
-              v.values.forEach(function (w) {
-                if (w.key == drill_key[2]) {
-                  w.values.forEach(function (u) {
-                    if (u.key == drill_key[3]) {
-                      results = u.values;
-                    }
-                  });
-                }
-              });
+          bar_data = d3
+          .nest()
+          .key(function (d) {
+            return d.Zip;
+          })
+          .key(function (d) {
+            return d.LoanRange;
+          })
+          .sortKeys(function(a, b) {
+            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
+          })
+          .entries(processed_data);
+          }
+        results = bar_data;
+
+      } else {
+      processed_data = processed_data.filter(function (v) {
+          if (filter == "All Sectors") {
+            return v
+          } else {
+            return (list_of_naicscodes.indexOf(+v.NAICSCode) >= 0);
+          }
+        })
+
+      processed_data_2 = processed_data.filter(function(v) {
+          return v.State == drill_key[1]
+        })
+
+        bar_data_1 = d3
+        .nest()
+        .key(function (d) {
+          return d.State;
+        })
+        .key(function (d) {
+          return d.LoanRange;
+        })
+        .sortKeys(function(a, b) {
+          return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
+        })
+        .entries(processed_data);
+
+          bar_data_0 = d3
+        .nest()
+        .key(function (d) {
+          return d.LoanRange;
+        })
+        .sortKeys(function(a, b) {
+          return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
+        })
+        .entries(processed_data);
+
+        results = []
+        if (drill_type == "city") {
+          bar_data_2 = d3
+          .nest()
+          .key(function (d) {
+            return d.City;
+          })
+          .key(function (d) {
+            return d.LoanRange;
+          })
+          .sortKeys(function(a, b) {
+            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
+          })
+          .entries(processed_data_2);
+        } else {
+          
+          bar_data_2 = d3
+          .nest()
+          .key(function (d) {
+            return d.Zip;
+          })
+          .key(function (d) {
+            return d.LoanRange;
+          })
+          .sortKeys(function(a, b) {
+            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
+          })
+          .entries(processed_data_2);
             }
-          });
-        }
+
+          bar_data_2.forEach(function(v) {
+            if (v.key == drill_key[2]) {
+              results.push(v)
+            }
+          })
+          bar_data_1.forEach(function(v) {
+            if (v.key == drill_key[1]) {
+              results.push(v)
+            }
+          })
+          results.push({'key': 'US', 'values': bar_data_0})
       }
     }
 
     if (drill_level == 0) {
+      d3.select(".stats-label-drill-0").style("display", "inline-block").html("");
       d3.select(".stats-label-drill-1").style("display", "none").html("");
       d3.select(".stats-label-drill-2").style("display", "none").html("");
       d3.select(".stats-label-drill-3").style("display", "none").html("");
+      d3.selectAll(".stats-drill-item").style("display", "none")
       d3.select(".stats-toggle").style("top", "-10px");
     } else {
       if (drill_level == 1) {
+        d3.select(".stats-label-drill-0").style("display", "inline-block").html("US");
         d3.select(".stats-label-drill-1")
-          .style("display", "block")
-          .html("States > " + key);
+          .style("display", "inline-block")
+          .html(" > " + key);
+        d3.select(".stats-drill-toggle")
+            .style("display", "block")
         d3.select(".stats-toggle").style("top", "-10px");
+        d3.selectAll(".stats-drill-item").style("display", "inline-block")
         d3.select(".stats-label-drill-2").style("display", "none").html("");
         d3.select(".stats-label-drill-3").style("display", "none").html("");
       } else {
-        if (drill_level == 2) {
-          d3.select(".stats-label-drill-2")
+        d3.select(".stats-label-drill-0").style("display", "inline-block").html("US");
+        d3.select(".stats-label-drill-1")
+          .style("display", "inline-block")
+          .html(" > " + drill_key[1]);
+        d3.select(".stats-label-drill-2")
+          .style("display", "inline-block")
+          .html(" > " + drill_key[2]);
+        d3.select(".stats-drill-toggle")
             .style("display", "block")
-            .html("Cities > " + key);
-          d3.select(".stats-toggle").style("top", "-10px");
-          d3.select(".stats-label-drill-3").style("display", "none").html("");
-        } else {
-          d3.select(".stats-label-drill-3")
-            .style("display", "block")
-            .html("Zip Code > " + key);
-          d3.select(".stats-toggle").style("top", "-10px");
-        }
+        d3.select(".stats-toggle").style("top", "-10px");
+        d3.selectAll(".stats-drill-item").style("display", "none")
+        d3.select(".stats-label-drill-3").style("display", "none").html("");
       }
     }
 
     var statsHeight = 20 + (5 + 20) * results.length;
+
+    if (drill_level == 3) {
+      statsHeight = 20 + (5 + 20) * 3
+    }
+
+    barSVG.attr("height", statsHeight);
+
+    console.log('results', results)
+
+    bar_scale = d3.scaleLinear()
+      .domain([0,1])
+      .range([50, 340]);
+
+    legendColorScale = d3.scaleOrdinal().domain(loan_range).range(colors);
+
+      results.forEach(function(v, o) {
+        var n = d3.sum(v.values, function(u) {
+          return u.values.length
+        })
+      barSVG
+        .selectAll("bars")
+        .data(v.values)
+        .enter()
+        .append("rect")
+        .attr("class", "bars")
+        .attr("fill", "blue")
+        .style("cursor", "pointer")
+        .attr("fill", function(d) {
+          return legendColorScale(d.key)
+        })
+        .attr("x", function (d, i) {
+            init = 0
+            v.values.forEach(function(u, idx) {
+              if (i == idx) {
+                d.init = init + ""
+              } else {
+                init += (u.values.length/n)
+              }
+            })
+            return 30 + bar_scale(+d.init);
+        })
+        .attr("y", function (d) {
+          return o * 25;
+        })
+        .attr("width", function (d) {
+          return bar_scale((d.values.length/n));
+        })
+        .attr("height", 20)
+      })
+
+
 
     barSVG
       .selectAll(".bar-label")
@@ -468,17 +674,39 @@ function loanMap(option) {
       );
     });
 
-    console.log("filtered_data", filtered_data);
-
     heatData = [];
-    filtered_data.forEach(function (v) {
+    var loan_values = [0.015, 0.035, 0.1, 0.2, 1];
+    loanHeatmapScale = d3.scaleOrdinal().domain(loan_range).range(loan_values);
+
+
+    heat_nest = d3.nest()
+      .key(function(v) {
+        return v['Zip']
+      })
+      .rollup(function(v) { 
+        return d3.sum(v, function(w) {
+        return loanHeatmapScale(w.LoanRange)
+      }); })
+      .entries(filtered_data)
+
+    heat_nest.forEach(function (v) {
+      v.location = [zip_json[+v.key][0], zip_json[+v.key][1]];
+      v.point = map.latLngToLayerPoint(
+        new L.LatLng(v.location[0], v.location[1])
+      );
+      var tmp_val = doStuff(v.location[1], v.location[0]);
+      tmp_val.push(loanHeatmapScale(v.value));
+      heatData.push(tmp_val);
+    });
+
+    /*filtered_data.forEach(function (v) {
       v.point = map.latLngToLayerPoint(
         new L.LatLng(v.location[0], v.location[1])
       );
       var tmp_val = doStuff(v.location[1], v.location[0]);
       tmp_val.push(loanHeatmapScale(v.LoanRange));
       heatData.push(tmp_val);
-    });
+    });*/
 
     featureCircle = g
       .selectAll(".feature-circle")
