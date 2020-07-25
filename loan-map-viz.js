@@ -695,8 +695,6 @@ function loanMap(option) {
     bounds_NE = map.getBounds()._northEast;
     bounds_SW = map.getBounds()._southWest;
 
-    console.log('bounds_NE', bounds_NE)
-    console.log('bounds_SW', bounds_SW)
     if (featureCircle != null) {
       featureCircle.remove();
     }

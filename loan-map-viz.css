@@ -96,7 +96,7 @@
 }
 
 .stats-label-drill-0 {
-  color: white;
+  color: #1A8FE3;
   display: inline-block;
   font-size: 1.2em;
   cursor: pointer;
@@ -106,7 +106,7 @@
 .stats-label-drill-3,
 .stats-label-drill-2,
 .stats-label-drill-1 {
-  color: white;
+  color: #1A8FE3;
   display: inline-block;
   font-size: 1.2em;
   cursor: pointer;
@@ -137,7 +137,7 @@
 }
 .bar-label-perc,
 .bar-label {
-  fill: white;
+  fill: #1A8FE3;
   font-size: 13px;
 }
 
