@@ -8,7 +8,7 @@ function loanMap(option) {
   const zip_json = option.zip_json;
   const industry_json = option.industry_json;
 
-  console.log(data);
+  console.log('industry_json', industry_json)
 
   var point_width = 4;
   var filter = "All Sectors";
@@ -53,6 +53,7 @@ function loanMap(option) {
     zoom: 4,
     minZoom: 3,
     maxZoom: 11,
+    zoomControl: false,
   }).addLayer(
     new L.TileLayer(
       "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=" +
@@ -63,6 +64,10 @@ function loanMap(option) {
       }
     )
   );
+
+  L.control.zoom({
+    position: 'topright'
+  }).addTo(map);
 
   var svg = d3.select(map.getPanes().overlayPane).append("svg"),
     g = svg.append("g").attr("class", "leaflet-zoom-hide");
@@ -107,17 +112,38 @@ function loanMap(option) {
     reset();
   });
 
+  // Tooltip
+  const tooltip = d3
+    .select("#map")
+    .append("div")
+    .attr("class", "chart-tooltip");
+  tooltip.append("div").attr("class", "tooltip-business_name");
+  tooltip.append("div").attr("class", "tooltip-address");
+  tooltip.append("div").attr("class", "tooltip-industry");
+  tooltip.append("div").attr("class", "tooltip-amount");
+  tooltip.append("div").attr("class", "tooltip-date_approved");
+
+  // legend tooltip
+  const legend_tooltip = d3
+    .select("#map")
+    .append("div")
+    .attr("class", "chart-legend-tooltip");
+  legend_tooltip.append("div").attr("class", "legend-tooltip-name");
+  legend_tooltip.append("div").attr("class", "legend-tooltip-bucket");
+  legend_tooltip.append("div").attr("class", "legend-tooltip-total");
+
   var legendContainer = d3
     .select("#map")
     .append("div")
     .attr("class", "legend-container")
     .attr("id", "legend-container")
-    .style("top", "20px")
-    .style("left", document.getElementById("map").clientWidth - 420 + "px")
+    //.style("top", "20px")
+    //.style("left", document.getElementById("map").clientWidth - 420 + "px")
     .style("height", window.innerHeight - 40 + "px");
 
   var noScrollTarget = document.getElementById("legend-container");
   L.DomEvent.disableScrollPropagation(noScrollTarget);
+
 
   var legendHeader = legendContainer
     .append("div")
@@ -203,7 +229,7 @@ function loanMap(option) {
     .attr("height", 95);
 
   var legend_examples = [0, 1, 2, 3, 4];
-  var colors = ["#540D6E", "#EE4266", "#FFD23F", "#3BCEAC", "#0EAD68"];
+  var colors = ["#540D6E", "#EE4266", "#FFD23F", "#3A86FF", "#0EAD68"];
   var loan_range = [
     "$150,000-350,000",
     "$350,000-1 million",
@@ -363,12 +389,6 @@ function loanMap(option) {
     drill_key = drill_key.slice(0, drill_level + 1);
     barSVG.selectAll("*").remove();
 
-    console.log('key', key)
-    console.log('drill_level', drill_level)
-    console.log('filter', filter)
-    console.log('drill_type', drill_type)
-    console.log('drill_key', drill_key)
-
     /*bar_data = d3
       .nest()
       .key(function (d) {
@@ -421,7 +441,6 @@ function loanMap(option) {
       .entries(processed_data);
 
       results = bar_data;
-      console.log('data', data)
     } else {
 
       if (drill_level == 1) {
@@ -587,8 +606,6 @@ function loanMap(option) {
 
     barSVG.attr("height", statsHeight);
 
-    console.log('results', results)
-
     bar_scale = d3.scaleLinear()
       .domain([0,1])
       .range([50, 340]);
@@ -628,6 +645,15 @@ function loanMap(option) {
           return bar_scale((d.values.length/n));
         })
         .attr("height", 20)
+        .on("mouseover", function(d) {
+          legend_bar_mouseover(v, d, n)
+        })
+        .on("mousemove", function() {
+          moveLegendTooltip()
+        })
+        .on("mouseout", function() {
+          legendMouseOut()
+        })
       })
 
 
@@ -643,7 +669,11 @@ function loanMap(option) {
         return i * 25 + 15;
       })
       .text(function (d) {
-        return d.key;
+        if ((drill_level == 1 || drill_level == 2) && drill_type == "zip") {
+          return +d.key
+        } else {
+          return d.key
+        }
       })
       .style("cursor", "pointer")
       .on("click", function (d) {
@@ -664,6 +694,9 @@ function loanMap(option) {
   function reset() {
     bounds_NE = map.getBounds()._northEast;
     bounds_SW = map.getBounds()._southWest;
+
+    console.log('bounds_NE', bounds_NE)
+    console.log('bounds_SW', bounds_SW)
     if (featureCircle != null) {
       featureCircle.remove();
     }
@@ -699,14 +732,11 @@ function loanMap(option) {
       heatData.push(tmp_val);
     });
 
-    /*filtered_data.forEach(function (v) {
+    filtered_data.forEach(function (v) {
       v.point = map.latLngToLayerPoint(
         new L.LatLng(v.location[0], v.location[1])
       );
-      var tmp_val = doStuff(v.location[1], v.location[0]);
-      tmp_val.push(loanHeatmapScale(v.LoanRange));
-      heatData.push(tmp_val);
-    });*/
+    });
 
     featureCircle = g
       .selectAll(".feature-circle")
@@ -733,6 +763,7 @@ function loanMap(option) {
       }),
     ];
 
+
     map.eachLayer(function (d) {
       if (d._heat) {
         map.removeLayer(d);
@@ -751,7 +782,7 @@ function loanMap(option) {
       var heat = L.heatLayer(heatData, {
         maxZoom: 11,
         minOpacity: 0.2,
-        radius: 15,
+        radius: 10,
       }).addTo(map);
     }
 
@@ -770,6 +801,7 @@ function loanMap(option) {
             return "none";
           }
         })
+        //.style("display", "block")
         .attr("fill", function (d) {
           return legendColorScale(d.LoanRange);
         })
@@ -788,17 +820,6 @@ function loanMap(option) {
     }
   }
 
-  // Tooltip
-  const tooltip = d3
-    .select("#map")
-    .append("div")
-    .attr("class", "chart-tooltip");
-  tooltip.append("div").attr("class", "tooltip-business_name");
-  tooltip.append("div").attr("class", "tooltip-address");
-  tooltip.append("div").attr("class", "tooltip-industry");
-  tooltip.append("div").attr("class", "tooltip-amount");
-  tooltip.append("div").attr("class", "tooltip-date_approved");
-
   // Use Leaflet to implement a D3 geometric transformation.
   function projectPoint(x, y) {
     var point = map.latLngToLayerPoint(new L.LatLng(y, x));
@@ -809,10 +830,48 @@ function loanMap(option) {
     showTooltip(d);
   }
 
+  function legend_bar_mouseover(v, d, n) {
+    var name = v.key
+    var bucket_name = d.key;
+    var total = d.values.length
+    var percent = Math.round(100*d.values.length/n) + "%"
+
+    legend_tooltip.select(".legend-tooltip-name").text(name);
+    legend_tooltip.select(".legend-tooltip-bucket").text(bucket_name);
+    legend_tooltip.select(".legend-tooltip-total").text(total + " (" + percent + ")");
+
+    legend_tooltip.transition().style("opacity", 1);
+
+    const { width, height } = legend_tooltip.node().getBoundingClientRect();
+    legend_tooltip.datum({ width, height });
+  }
+
+    function moveLegendTooltip() {
+    let padding = 10;
+    const { width, height } = legend_tooltip.datum();
+    let x = d3.event.clientX;
+    if (x + padding + width > window.innerWidth) {
+      x = x - padding - width;
+    } else {
+      x = x + padding;
+    }
+    let y = d3.event.clientY;
+    if (y + padding + height > window.innerHeight) {
+      y = y - padding - height;
+    } else {
+      y = y + padding;
+    }
+    legend_tooltip.style("transform", `translate(${x}px,${y}px)`);
+  }
+
+  function legendMouseOut() {
+    legend_tooltip.transition().style("opacity", 0);
+  }
+
   function showTooltip(d) {
     var business_name = d.BusinessName;
     var address = d.Address;
-    var industry = industry_json[d.NAICSCode].ds_naics_industry;
+    var industry = industry_json[+d.NAICSCode].ds_naics_industry;
     var amount = d.LoanRange;
     var date_approved = d.DateApproved;
 

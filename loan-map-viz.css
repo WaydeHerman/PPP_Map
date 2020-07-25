@@ -33,7 +33,7 @@
 
 .stats-label {
   color: white;
-  font-size: 1.2em;
+  font-size: 1.4em;
   font-weight: bold;
   margin-top: 10px;
   margin-left: 10px;
@@ -144,8 +144,10 @@
 .legend-container {
   width: 400px;
   background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1000;
+  z-index: 998;
   position: relative;
+  top: 20px;
+  left: 20px;
 }
 
 .legend-header {
@@ -166,6 +168,7 @@
 .legend-title {
   color: white;
   font-size: 1.4em;
+  font-weight: 700;
   position: relative;
   opacity: 0.8;
   top: 10px;
@@ -383,8 +386,30 @@ i {
   opacity: 0;
 }
 
+.chart-legend-tooltip {
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  padding: 0.25em 0.5em;
+  border-width: 2px;
+  border-style: solid;
+  background: rgba(255, 255, 255, 0.95);
+  pointer-events: none;
+  opacity: 0;
+}
+
 .highlighted {
   color: #ffcb47;
+}
+
+.legend-tooltip-name {
+  color: #a6a6a6;
+  font-weight: bold;
+}
+.legend-tooltip-bucket,
+.legend-tooltip-total {
+  color: #a6a6a6;
 }
 
 .chart-tooltip .tooltip-desc,
