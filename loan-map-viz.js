@@ -708,7 +708,7 @@ function loanMap(option) {
     });
 
     heatData = [];
-    var loan_values = [0.015, 0.035, 0.1, 0.2, 1];
+    var loan_values = [0.035, 0.1, 0.2, 0.5, 1];
     loanHeatmapScale = d3.scaleOrdinal().domain(loan_range).range(loan_values);
 
 
@@ -785,8 +785,8 @@ function loanMap(option) {
     if (map._zoom < 7) {
       var heat = L.heatLayer(heatData, {
         maxZoom: 11,
-        minOpacity: 0.1,
-        radius: 10,
+        minOpacity: 0.2,
+        radius: 20,
       }).addTo(map);
     }
 

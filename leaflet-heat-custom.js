@@ -19,10 +19,10 @@
   (t.prototype = {
     defaultRadius: 5,
     defaultGradient: {
-      0.015: "#540C6E",
-      //0.035: "#EE4266",
-      0.1: "#FFD23F",
-      0.2: "#3A86FF",
+      0.035: "#540C6E",
+      0.1: "#EE4266",
+      0.2: "#FFD23F",
+      0.5: "#3A86FF",
       1: "#0FAD68",
     },
     data: function (t, i) {
