@@ -17,10 +17,10 @@
       : new t(i);
   }
   (t.prototype = {
-    defaultRadius: 25,
+    defaultRadius: 5,
     defaultGradient: {
       0.015: "#540C6E",
-      0.035: "#EE4266",
+      //0.035: "#EE4266",
       0.1: "#FFD23F",
       0.2: "#3A86FF",
       1: "#0FAD68",

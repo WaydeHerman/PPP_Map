@@ -93,7 +93,9 @@ function loanMap(option) {
 
     data = data.filter(function (d) {
       return d.point != null;
-    });
+    }).filter(function (d) {
+      return d.State == "AK"
+    })
 
     // process heat data
 
@@ -720,7 +722,7 @@ function loanMap(option) {
       }); })
       .entries(filtered_data)
 
-    heat_nest.forEach(function (v) {
+    /*heat_nest.forEach(function (v) {
       v.location = [zip_json[+v.key][0], zip_json[+v.key][1]];
       v.point = map.latLngToLayerPoint(
         new L.LatLng(v.location[0], v.location[1])
@@ -728,12 +730,16 @@ function loanMap(option) {
       var tmp_val = doStuff(v.location[1], v.location[0]);
       tmp_val.push(loanHeatmapScale(v.value));
       heatData.push(tmp_val);
-    });
+    });*/
 
     filtered_data.forEach(function (v) {
+      v.location = [zip_json[+v.Zip][0], zip_json[+v.Zip][1]];
       v.point = map.latLngToLayerPoint(
         new L.LatLng(v.location[0], v.location[1])
       );
+      var tmp_val = doStuff(v.location[1], v.location[0]);
+      tmp_val.push(loanHeatmapScale(v.LoanRange));
+      heatData.push(tmp_val);
     });
 
     featureCircle = g
@@ -779,7 +785,7 @@ function loanMap(option) {
     if (map._zoom < 7) {
       var heat = L.heatLayer(heatData, {
         maxZoom: 11,
-        minOpacity: 0.2,
+        minOpacity: 0.1,
         radius: 10,
       }).addTo(map);
     }
