@@ -8,7 +8,7 @@ function loanMap(option) {
   const zip_json = option.zip_json;
   const industry_json = option.industry_json;
 
-  console.log('industry_json', industry_json)
+  console.log("industry_json", industry_json);
 
   var point_width = 4;
   var filter = "All Sectors";
@@ -65,9 +65,11 @@ function loanMap(option) {
     )
   );
 
-  L.control.zoom({
-    position: 'topright'
-  }).addTo(map);
+  L.control
+    .zoom({
+      position: "topright",
+    })
+    .addTo(map);
 
   var svg = d3.select(map.getPanes().overlayPane).append("svg"),
     g = svg.append("g").attr("class", "leaflet-zoom-hide");
@@ -91,11 +93,13 @@ function loanMap(option) {
       }
     });
 
-    data = data.filter(function (d) {
-      return d.point != null;
-    }).filter(function (d) {
-      return d.State == "AK"
-    })
+    data = data
+      .filter(function (d) {
+        return d.point != null;
+      })
+      .filter(function (d) {
+        return d.State == "AK";
+      });
 
     // process heat data
 
@@ -146,14 +150,19 @@ function loanMap(option) {
   var noScrollTarget = document.getElementById("legend-container");
   L.DomEvent.disableScrollPropagation(noScrollTarget);
 
-
   var legendHeader = legendContainer
     .append("div")
     .attr("class", "legend-header");
 
-  legendHeader.append("div").attr("class", "legend-title").text("Main Street Recovery");
+  legendHeader
+    .append("div")
+    .attr("class", "legend-title")
+    .text("Main Street Recovery");
 
-  legendHeader.append("div").attr("class", "legend-area-title").text("PPP Loan Distribution");
+  legendHeader
+    .append("div")
+    .attr("class", "legend-area-title")
+    .text("PPP Loan Distribution");
 
   var sectorPickerContainer = legendHeader
     .append("div")
@@ -239,7 +248,7 @@ function loanMap(option) {
     "$2-5 million",
     "$5-10 million",
   ];
-  var loan_values = [0.015, 0.035, 0.1, 0.2, 1];
+  var loan_values = [0.035, 0.1, 0.2, 0.5, 1];
 
   var legendColorScale = d3.scaleOrdinal().domain(loan_range).range(colors);
 
@@ -348,30 +357,30 @@ function loanMap(option) {
 
   var statsDrillToggle = statsContainer
     .append("div")
-    .attr("class", "stats-drill-toggle")
-    
+    .attr("class", "stats-drill-toggle");
+
   statsDrillToggle
     .append("div")
     .attr("class", "stats-drill-item stats-drill-city")
     .style("background-color", "#0FAD68")
     .html("By City")
-    .on("click", function() {
-      drill_type = "city"
-      d3.select(".stats-drill-zip").style("background-color", "transparent")
-      d3.select(".stats-drill-city").style("background-color", "#0FAD68")
+    .on("click", function () {
+      drill_type = "city";
+      d3.select(".stats-drill-zip").style("background-color", "transparent");
+      d3.select(".stats-drill-city").style("background-color", "#0FAD68");
       updateStats(drill_key[1], 1);
-    })
+    });
 
   statsDrillToggle
     .append("div")
     .attr("class", "stats-drill-item stats-drill-zip")
     .html("By Zip")
-    .on("click", function() {
-      drill_type = "zip"
-      d3.select(".stats-drill-zip").style("background-color", "#0FAD68")
-      d3.select(".stats-drill-city").style("background-color", "transparent")
+    .on("click", function () {
+      drill_type = "zip";
+      d3.select(".stats-drill-zip").style("background-color", "#0FAD68");
+      d3.select(".stats-drill-city").style("background-color", "transparent");
       updateStats(drill_key[1], 1);
-    })
+    });
 
   var barContainer = statsContainer
     .append("div")
@@ -411,94 +420,25 @@ function loanMap(option) {
         })
       );*/
 
-      var loan_range = [
-        "$150,000-350,000",
-        "$350,000-1 million",
-        "$1-2 million",
-        "$2-5 million",
-        "$5-10 million",
-      ];
+    var loan_range = [
+      "$150,000-350,000",
+      "$350,000-1 million",
+      "$1-2 million",
+      "$2-5 million",
+      "$5-10 million",
+    ];
 
-      var processed_data = data
+    var processed_data = data;
 
     if (drill_level == 0) {
       processed_data = processed_data.filter(function (v) {
-          if (filter == "All Sectors") {
-            return v
-          } else {
-            return (list_of_naicscodes.indexOf(+v.NAICSCode) >= 0);
-          }
-        })
-      bar_data = d3
-      .nest()
-      .key(function (d) {
-        return d.State;
-      })
-      .key(function (d) {
-        return d.LoanRange;
-      })
-      .sortKeys(function(a, b) {
-        return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
-      })
-      .entries(processed_data);
-
-      results = bar_data;
-    } else {
-
-      if (drill_level == 1) {
-        processed_data = processed_data.filter(function (v) {
-          if (filter == "All Sectors") {
-            return v
-          } else {
-            return (list_of_naicscodes.indexOf(+v.NAICSCode) >= 0);
-          }
-        }).filter(function(v) {
-          return v.State == drill_key[1]
-        })
-
-        if (drill_type == "city") {
-          bar_data = d3
-          .nest()
-          .key(function (d) {
-            return d.City;
-          })
-          .key(function (d) {
-            return d.LoanRange;
-          })
-          .sortKeys(function(a, b) {
-            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
-          })
-          .entries(processed_data);
+        if (filter == "All Sectors") {
+          return v;
         } else {
-          bar_data = d3
-          .nest()
-          .key(function (d) {
-            return d.Zip;
-          })
-          .key(function (d) {
-            return d.LoanRange;
-          })
-          .sortKeys(function(a, b) {
-            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
-          })
-          .entries(processed_data);
-          }
-        results = bar_data;
-
-      } else {
-      processed_data = processed_data.filter(function (v) {
-          if (filter == "All Sectors") {
-            return v
-          } else {
-            return (list_of_naicscodes.indexOf(+v.NAICSCode) >= 0);
-          }
-        })
-
-      processed_data_2 = processed_data.filter(function(v) {
-          return v.State == drill_key[1]
-        })
-
-        bar_data_1 = d3
+          return list_of_naicscodes.indexOf(+v.NAICSCode) >= 0;
+        }
+      });
+      bar_data = d3
         .nest()
         .key(function (d) {
           return d.State;
@@ -506,96 +446,168 @@ function loanMap(option) {
         .key(function (d) {
           return d.LoanRange;
         })
-        .sortKeys(function(a, b) {
-          return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
+        .sortKeys(function (a, b) {
+          return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b));
         })
         .entries(processed_data);
 
-          bar_data_0 = d3
-        .nest()
-        .key(function (d) {
-          return d.LoanRange;
-        })
-        .sortKeys(function(a, b) {
-          return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
-        })
-        .entries(processed_data);
+      results = bar_data;
+    } else {
+      if (drill_level == 1) {
+        processed_data = processed_data
+          .filter(function (v) {
+            if (filter == "All Sectors") {
+              return v;
+            } else {
+              return list_of_naicscodes.indexOf(+v.NAICSCode) >= 0;
+            }
+          })
+          .filter(function (v) {
+            return v.State == drill_key[1];
+          });
 
-        results = []
+        if (drill_type == "city") {
+          bar_data = d3
+            .nest()
+            .key(function (d) {
+              return d.City;
+            })
+            .key(function (d) {
+              return d.LoanRange;
+            })
+            .sortKeys(function (a, b) {
+              return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b));
+            })
+            .entries(processed_data);
+        } else {
+          bar_data = d3
+            .nest()
+            .key(function (d) {
+              return d.Zip;
+            })
+            .key(function (d) {
+              return d.LoanRange;
+            })
+            .sortKeys(function (a, b) {
+              return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b));
+            })
+            .entries(processed_data);
+        }
+        results = bar_data;
+      } else {
+        processed_data = processed_data.filter(function (v) {
+          if (filter == "All Sectors") {
+            return v;
+          } else {
+            return list_of_naicscodes.indexOf(+v.NAICSCode) >= 0;
+          }
+        });
+
+        processed_data_2 = processed_data.filter(function (v) {
+          return v.State == drill_key[1];
+        });
+
+        bar_data_1 = d3
+          .nest()
+          .key(function (d) {
+            return d.State;
+          })
+          .key(function (d) {
+            return d.LoanRange;
+          })
+          .sortKeys(function (a, b) {
+            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b));
+          })
+          .entries(processed_data);
+
+        bar_data_0 = d3
+          .nest()
+          .key(function (d) {
+            return d.LoanRange;
+          })
+          .sortKeys(function (a, b) {
+            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b));
+          })
+          .entries(processed_data);
+
+        results = [];
         if (drill_type == "city") {
           bar_data_2 = d3
-          .nest()
-          .key(function (d) {
-            return d.City;
-          })
-          .key(function (d) {
-            return d.LoanRange;
-          })
-          .sortKeys(function(a, b) {
-            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
-          })
-          .entries(processed_data_2);
+            .nest()
+            .key(function (d) {
+              return d.City;
+            })
+            .key(function (d) {
+              return d.LoanRange;
+            })
+            .sortKeys(function (a, b) {
+              return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b));
+            })
+            .entries(processed_data_2);
         } else {
-          
           bar_data_2 = d3
-          .nest()
-          .key(function (d) {
-            return d.Zip;
-          })
-          .key(function (d) {
-            return d.LoanRange;
-          })
-          .sortKeys(function(a, b) {
-            return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b))
-          })
-          .entries(processed_data_2);
-            }
+            .nest()
+            .key(function (d) {
+              return d.Zip;
+            })
+            .key(function (d) {
+              return d.LoanRange;
+            })
+            .sortKeys(function (a, b) {
+              return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b));
+            })
+            .entries(processed_data_2);
+        }
 
-          bar_data_2.forEach(function(v) {
-            if (v.key == drill_key[2]) {
-              results.push(v)
-            }
-          })
-          bar_data_1.forEach(function(v) {
-            if (v.key == drill_key[1]) {
-              results.push(v)
-            }
-          })
-          results.push({'key': 'US', 'values': bar_data_0})
+        bar_data_2.forEach(function (v) {
+          if (v.key == drill_key[2]) {
+            results.push(v);
+          }
+        });
+        bar_data_1.forEach(function (v) {
+          if (v.key == drill_key[1]) {
+            results.push(v);
+          }
+        });
+        results.push({ key: "US", values: bar_data_0 });
       }
     }
 
     if (drill_level == 0) {
-      d3.select(".stats-label-drill-0").style("display", "inline-block").html("");
+      d3.select(".stats-label-drill-0")
+        .style("display", "inline-block")
+        .html("");
       d3.select(".stats-label-drill-1").style("display", "none").html("");
       d3.select(".stats-label-drill-2").style("display", "none").html("");
       d3.select(".stats-label-drill-3").style("display", "none").html("");
-      d3.selectAll(".stats-drill-item").style("display", "none")
+      d3.selectAll(".stats-drill-item").style("display", "none");
       d3.select(".stats-toggle").style("top", "-10px");
     } else {
       if (drill_level == 1) {
-        d3.select(".stats-label-drill-0").style("display", "inline-block").html("US");
+        d3.select(".stats-label-drill-0")
+          .style("display", "inline-block")
+          .html("US");
         d3.select(".stats-label-drill-1")
           .style("display", "inline-block")
           .html(" > " + key);
-        d3.select(".stats-drill-toggle")
-            .style("display", "block")
+        d3.select(".stats-drill-toggle").style("display", "block");
         d3.select(".stats-toggle").style("top", "-10px");
-        d3.selectAll(".stats-drill-item").style("display", "inline-block")
+        d3.selectAll(".stats-drill-item").style("display", "inline-block");
         d3.select(".stats-label-drill-2").style("display", "none").html("");
         d3.select(".stats-label-drill-3").style("display", "none").html("");
       } else {
-        d3.select(".stats-label-drill-0").style("display", "inline-block").html("US");
+        d3.select(".stats-label-drill-0")
+          .style("display", "inline-block")
+          .html("US");
         d3.select(".stats-label-drill-1")
           .style("display", "inline-block")
           .html(" > " + drill_key[1]);
         d3.select(".stats-label-drill-2")
           .style("display", "inline-block")
           .html(" > " + drill_key[2]);
-        d3.select(".stats-drill-toggle")
-            .style("display", "block")
+        d3.select(".stats-drill-toggle").style("display", "block");
         d3.select(".stats-toggle").style("top", "-10px");
-        d3.selectAll(".stats-drill-item").style("display", "none")
+        d3.selectAll(".stats-drill-item").style("display", "none");
         d3.select(".stats-label-drill-3").style("display", "none").html("");
       }
     }
@@ -603,21 +615,19 @@ function loanMap(option) {
     var statsHeight = 20 + (5 + 20) * results.length;
 
     if (drill_level == 3) {
-      statsHeight = 20 + (5 + 20) * 3
+      statsHeight = 20 + (5 + 20) * 3;
     }
 
     barSVG.attr("height", statsHeight);
 
-    bar_scale = d3.scaleLinear()
-      .domain([0,1])
-      .range([50, 340]);
+    bar_scale = d3.scaleLinear().domain([0, 1]).range([50, 340]);
 
     legendColorScale = d3.scaleOrdinal().domain(loan_range).range(colors);
 
-      results.forEach(function(v, o) {
-        var n = d3.sum(v.values, function(u) {
-          return u.values.length
-        })
+    results.forEach(function (v, o) {
+      var n = d3.sum(v.values, function (u) {
+        return u.values.length;
+      });
       barSVG
         .selectAll("bars")
         .data(v.values)
@@ -626,39 +636,37 @@ function loanMap(option) {
         .attr("class", "bars")
         .attr("fill", "blue")
         .style("cursor", "pointer")
-        .attr("fill", function(d) {
-          return legendColorScale(d.key)
+        .attr("fill", function (d) {
+          return legendColorScale(d.key);
         })
         .attr("x", function (d, i) {
-            init = 0
-            v.values.forEach(function(u, idx) {
-              if (i == idx) {
-                d.init = init + ""
-              } else {
-                init += (u.values.length/n)
-              }
-            })
-            return 30 + bar_scale(+d.init);
+          init = 0;
+          v.values.forEach(function (u, idx) {
+            if (i == idx) {
+              d.init = init + "";
+            } else {
+              init += u.values.length / n;
+            }
+          });
+          return 30 + bar_scale(+d.init);
         })
         .attr("y", function (d) {
           return o * 25;
         })
         .attr("width", function (d) {
-          return bar_scale((d.values.length/n));
+          return bar_scale(d.values.length / n);
         })
         .attr("height", 20)
-        .on("mouseover", function(d) {
-          legend_bar_mouseover(v, d, n)
+        .on("mouseover", function (d) {
+          legend_bar_mouseover(v, d, n);
         })
-        .on("mousemove", function() {
-          moveLegendTooltip()
+        .on("mousemove", function () {
+          moveLegendTooltip();
         })
-        .on("mouseout", function() {
-          legendMouseOut()
-        })
-      })
-
-
+        .on("mouseout", function () {
+          legendMouseOut();
+        });
+    });
 
     barSVG
       .selectAll(".bar-label")
@@ -672,9 +680,9 @@ function loanMap(option) {
       })
       .text(function (d) {
         if ((drill_level == 1 || drill_level == 2) && drill_type == "zip") {
-          return +d.key
+          return +d.key;
         } else {
-          return d.key
+          return d.key;
         }
       })
       .style("cursor", "pointer")
@@ -711,16 +719,17 @@ function loanMap(option) {
     var loan_values = [0.035, 0.1, 0.2, 0.5, 1];
     loanHeatmapScale = d3.scaleOrdinal().domain(loan_range).range(loan_values);
 
-
-    heat_nest = d3.nest()
-      .key(function(v) {
-        return v['Zip']
+    heat_nest = d3
+      .nest()
+      .key(function (v) {
+        return v["Zip"];
       })
-      .rollup(function(v) { 
-        return d3.sum(v, function(w) {
-        return loanHeatmapScale(w.LoanRange)
-      }); })
-      .entries(filtered_data)
+      .rollup(function (v) {
+        return d3.sum(v, function (w) {
+          return loanHeatmapScale(w.LoanRange);
+        });
+      })
+      .entries(filtered_data);
 
     /*heat_nest.forEach(function (v) {
       v.location = [zip_json[+v.key][0], zip_json[+v.key][1]];
@@ -739,7 +748,10 @@ function loanMap(option) {
       );
       var tmp_val = doStuff(v.location[1], v.location[0]);
       tmp_val.push(loanHeatmapScale(v.LoanRange));
-      heatData.push(tmp_val);
+      var test = Math.round(loanHeatmapScale(v.LoanRange) / 0.035);
+      for (let i = 0; i <= test; i++) {
+        heatData.push(tmp_val);
+      }
     });
 
     featureCircle = g
@@ -766,7 +778,6 @@ function loanMap(option) {
         return v.point.y;
       }),
     ];
-
 
     map.eachLayer(function (d) {
       if (d._heat) {
@@ -835,14 +846,16 @@ function loanMap(option) {
   }
 
   function legend_bar_mouseover(v, d, n) {
-    var name = v.key
+    var name = v.key;
     var bucket_name = d.key;
-    var total = d.values.length
-    var percent = Math.round(100*d.values.length/n) + "%"
+    var total = d.values.length;
+    var percent = Math.round((100 * d.values.length) / n) + "%";
 
     legend_tooltip.select(".legend-tooltip-name").text(name);
     legend_tooltip.select(".legend-tooltip-bucket").text(bucket_name);
-    legend_tooltip.select(".legend-tooltip-total").text(total + " (" + percent + ")");
+    legend_tooltip
+      .select(".legend-tooltip-total")
+      .text(total + " (" + percent + ")");
 
     legend_tooltip.transition().style("opacity", 1);
 
@@ -850,7 +863,7 @@ function loanMap(option) {
     legend_tooltip.datum({ width, height });
   }
 
-    function moveLegendTooltip() {
+  function moveLegendTooltip() {
     let padding = 10;
     const { width, height } = legend_tooltip.datum();
     let x = d3.event.clientX;
