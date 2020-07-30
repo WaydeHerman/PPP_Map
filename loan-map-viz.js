@@ -54,7 +54,7 @@ function loanMap(option) {
     zoomControl: false,
   }).addLayer(
     new L.TileLayer(
-      "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=" +
+      "https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=" +
         accessToken,
       {
         attribution:
