@@ -161,19 +161,51 @@ function loanMap(option) {
     .append("div")
     .attr("class", "flow-picker-container");
 
+  var statePickerContainer = legendHeader
+    .append("div")
+    .attr("class", "state-picker-container");
+
   sectorPickerContainer.append("div").attr("class", "dropdown-flow");
 
-  d3.select(".dropdown-flow")
+  statePickerContainer.append("div").attr("class", "dropdown-state");
+
+  sectorPickerContainer
+    .select(".dropdown-flow")
     .append("div")
     .attr("class", "dropdown-content")
     .attr("id", "flow-selector");
 
-  d3.select(".dropdown-flow")
+  sectorPickerContainer
+    .select(".dropdown-state")
     .append("button")
     .attr("class", "dropbtn")
     .html(
       "Select Sector" + " <i class='fas dropbtn-icon fa-chevron-down'></i>"
     );
+
+  statePickerContainer
+    .select(".dropdown-state")
+    .append("div")
+    .attr("class", "dropdown-content")
+    .attr("id", "state-selector");
+
+  statePickerContainer
+    .select(".dropdown-state")
+    .append("button")
+    .attr("class", "dropbtn")
+    .html("Select State" + " <i class='fas dropbtn-icon fa-chevron-down'></i>");
+
+  d3.select("#state-selector")
+    .selectAll("a")
+    .data(["AK", "ID", "DC"])
+    .enter()
+    .append("text")
+    .html(function (d) {
+      return "<a href='#'>" + d + "</a>";
+    })
+    .on("click", function (d) {
+      get_data(d);
+    });
 
   var sectors_object = d3
     .nest()

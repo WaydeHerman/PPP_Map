@@ -96,7 +96,7 @@
 }
 
 .stats-label-drill-0 {
-  color: #1A8FE3;
+  color: #1a8fe3;
   display: inline-block;
   font-size: 1.2em;
   cursor: pointer;
@@ -106,7 +106,7 @@
 .stats-label-drill-3,
 .stats-label-drill-2,
 .stats-label-drill-1 {
-  color: #1A8FE3;
+  color: #1a8fe3;
   display: inline-block;
   font-size: 1.2em;
   cursor: pointer;
@@ -137,7 +137,7 @@
 }
 .bar-label-perc,
 .bar-label {
-  fill: #1A8FE3;
+  fill: #1a8fe3;
   font-size: 13px;
 }
 
@@ -194,6 +194,12 @@
 .flow-picker-container {
   position: relative;
   top: 30px;
+  left: -5px;
+}
+
+.state-picker-container {
+  position: relative;
+  top: 0px;
   left: -5px;
 }
 
@@ -274,9 +280,19 @@
 .dropdown-flow {
   margin: auto;
   position: relative;
-    /* float: right; */
-    top: -25px;
-    left: 15px;
+  /* float: right; */
+  top: -25px;
+  left: 15px;
+  display: inline-block;
+  min-width: 160px;
+}
+
+.dropdown-state {
+  margin: auto;
+  position: relative;
+  /* float: right; */
+  top: -25px;
+  left: 15px;
   display: inline-block;
   min-width: 160px;
 }
@@ -315,12 +331,14 @@
 }
 
 /* Show the dropdown menu on hover */
+.dropdown-state:hover .dropdown-content,
 .dropdown-map-type:hover .dropdown-content,
 .dropdown-flow:hover .dropdown-content {
   display: block;
 }
 
 /* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown-state:hover .dropbtn,
 .dropdown-map-type:hover .dropbtn,
 .dropdown-flow:hover .dropbtn {
   background-color: #132a54;
