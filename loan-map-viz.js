@@ -3,12 +3,9 @@ function loanMap(option) {
   const el = option.el;
   const height = option.height;
   const width = option.width || "";
-  var data = option.data;
   const sectors = option.sectors;
   const zip_json = option.zip_json;
   const industry_json = option.industry_json;
-
-  console.log("industry_json", industry_json);
 
   var point_width = 4;
   var filter = "All Sectors";
@@ -17,6 +14,7 @@ function loanMap(option) {
   var drill_key = [];
   var drill_type = "city";
   var heatData,
+    data,
     json_copy,
     bounds_NE,
     bounds_SW,
@@ -77,46 +75,41 @@ function loanMap(option) {
   var transform = d3.geoTransform({ point: projectPoint }),
     path = d3.geoPath().projection(transform);
 
-  function plot() {
-    document.getElementsByClassName("leaflet-zoom-hide").innerHTML = "";
-    d3.selectAll(".feature-circle").remove();
-    json_copy = JSON.parse(JSON.stringify(zip_json));
+  function get_data(state_choice) {
+    console.log("State_Data/data_" + state_choice + ".csv");
+    d3.csv("State_Data/data_" + state_choice + ".csv").then(function (
+      state_data
+    ) {
+      document.getElementsByClassName("leaflet-zoom-hide").innerHTML = "";
+      d3.selectAll(".feature-circle").remove();
+      json_copy = JSON.parse(JSON.stringify(zip_json));
+      data = state_data;
 
-    // get coordinates for points
-
-    data.forEach(function (v) {
-      if (zip_json[+v.Zip]) {
-        v.location = [zip_json[+v.Zip][0], zip_json[+v.Zip][1]];
-        v.point = map.latLngToLayerPoint(
-          new L.LatLng(v.location[0], v.location[1])
-        );
-      }
-    });
-
-    data = data
-      .filter(function (d) {
-        return d.point != null;
-      })
-      .filter(function (d) {
-        return d.State == "AK";
+      // get coordinates for points
+      data.forEach(function (v) {
+        if (zip_json[+v.Zip]) {
+          v.location = [zip_json[+v.Zip][0], zip_json[+v.Zip][1]];
+          v.point = map.latLngToLayerPoint(
+            new L.LatLng(v.location[0], v.location[1])
+          );
+        }
       });
 
-    // process heat data
+      data = data.filter(function (d) {
+        return d.point != null;
+      });
+      console.log("data", data);
 
-    /*featureCircle = g
-      .selectAll(".feature-circle")
-      .data(data)
-      .enter()
-      .append("circle")
-      .attr("class", "feature-circle");*/
+      map.on("viewreset", reset);
+
+      map.on("dragend", function (e) {
+        reset();
+      });
+
+      console.log("data", data);
+      reset();
+    });
   }
-
-  plot();
-  map.on("viewreset", reset);
-
-  map.on("dragend", function (e) {
-    reset();
-  });
 
   // Tooltip
   const tooltip = d3
@@ -389,9 +382,7 @@ function loanMap(option) {
 
   barSVG = barContainer.append("svg").attr("width", 370);
 
-  updateStats("", 0);
-
-  reset();
+  get_data("AK");
 
   function updateStats(key, drill_level) {
     drill_key.push(key);
@@ -429,6 +420,7 @@ function loanMap(option) {
     ];
 
     var processed_data = data;
+    console.log("data", data);
 
     if (drill_level == 0) {
       processed_data = processed_data.filter(function (v) {
