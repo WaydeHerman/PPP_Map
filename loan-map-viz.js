@@ -382,7 +382,11 @@ function loanMap(option) {
 
   barSVG = barContainer.append("svg").attr("width", 370);
 
-  get_data("AK");
+  get_data("ID");
+
+  setTimeout(function () {
+    get_data("AK");
+  }, 5000);
 
   function updateStats(key, drill_level) {
     drill_key.push(key);
