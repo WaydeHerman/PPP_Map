@@ -64,14 +64,26 @@
 }
 
 .stats-drill-item {
-  color: white;
+  color: #000;
   text-align: center;
   cursor: pointer;
   width: 70px;
   display: inline-block;
   padding: 5px;
-  font-size: 1.2em;
-  border: 1px solid white;
+  font-size: 1em;
+  border: 1px solid #000;
+}
+
+.stats-drill-item-alt {
+  color: #000;
+  text-align: center;
+  cursor: pointer;
+  width: 40px;
+  display: inline-block;
+  padding: 5px;
+  font-size: 1em;
+  border: 1px solid #000;
+  float: right;
 }
 
 /* width */
@@ -141,42 +153,73 @@
   font-size: 13px;
 }
 
-.legend-container {
-  width: 400px;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 998;
+.top-bar {
+  font-family: "Nunito", sans-serif;
+  background-color: #fff;
+  z-index: 999;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.top-bar-strip {
   position: relative;
-  top: 20px;
+  top: 0px;
   left: 20px;
+  border-bottom: 1px solid #8f8f8f;
+}
+
+.title {
+  font-size: 1.4em;
+  font-weight: 700;
+  position: relative;
+  top: 10px;
+}
+
+.sidebar-container {
+  font-family: "Nunito", sans-serif;
+  width: 300px;
+  background-color: #fff;
+  z-index: 1000;
+  position: absolute;
+  right: 0px;
+  top: 60px;
+}
+
+.legend-container {
+  font-family: "Nunito", sans-serif;
+  font-size: 1em;
+  width: 300px;
+  background-color: #fff;
+  z-index: 998;
+  position: absolute;
+  top: 60px;
 }
 
 .legend-header {
-  border-bottom: 1px solid white;
   height: 90px;
 }
 
 .legend-sub-header {
   height: 110px;
-  border-bottom: 1px solid white;
 }
 
 .legend-text {
-  fill: white;
+  fill: #8f8f8f;
   font-weight: bold;
 }
 
 .legend-title {
-  color: white;
-  font-size: 1.4em;
-  font-weight: 700;
+  color: #8f8f8f;
   position: relative;
-  opacity: 0.8;
-  top: 10px;
-  left: 10px;
+  top: -10px;
+  left: 20px;
+  font-weight: bold;
+  font-size: 1.4em;
 }
 
 .legend-area-title {
-  color: white;
+  color: #8f8f8f;
   font-size: 1.2em;
   top: 15px;
   left: 10px;
@@ -184,8 +227,23 @@
   padding-bottom: 10px;
 }
 
+.legend-svg {
+  position: relative;
+  top: -6px;
+  left: 20px;
+}
+
+.state-selection-label {
+  color: #8f8f8f;
+  font-weight: bold;
+  font-size: 1.4em;
+  position: relative;
+  left: 20px;
+  top: 0px;
+}
+
 .legend-axis {
-  stroke: white;
+  stroke: #8f8f8f;
   stroke-width: 1px;
   stroke-dasharray: 5, 5;
   fill: none;
@@ -199,8 +257,34 @@
 
 .state-picker-container {
   position: relative;
-  top: 0px;
-  left: -5px;
+  top: 30px;
+  left: 5px;
+}
+
+.sector-picker-container {
+  position: relative;
+  top: 230px;
+  left: 0px;
+}
+
+.sector-picker-svg {
+  top: -5px;
+  left: -50px;
+  position: relative;
+}
+
+.sector-title {
+  color: #8f8f8f;
+  font-weight: bold;
+  font-size: 1.4em;
+  top: -460px;
+  left: 20px;
+  position: relative;
+}
+
+.sector-picker {
+  cursor: pointer;
+  font-size: 0.8em;
 }
 
 .map-type-picker-container {
@@ -220,7 +304,7 @@
 }
 
 .flow-picker-text {
-  color: white;
+  color: #8f8f8f;
   display: inline-block;
   position: relative;
   left: 10px;
@@ -301,7 +385,7 @@
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #171717;
+  background-color: #fff;
   font-size: 14px;
   min-width: 140px;
   z-index: 1;
@@ -366,14 +450,6 @@ i {
   display: inline-block;
 }
 
-.legend-svg {
-  margin: auto;
-  position: relative;
-  top: 10px;
-  left: 100px;
-  display: inline-block;
-}
-
 .export-option-title {
   color: white;
   font-size: 14px;
@@ -402,19 +478,20 @@ i {
   background: rgba(255, 255, 255, 0.95);
   pointer-events: none;
   opacity: 0;
+  font-family: "Nunito", sans-serif;
 }
 
 .chart-legend-tooltip {
   position: fixed;
-  z-index: 999;
+  z-index: 1100;
   left: 0;
   top: 0;
   padding: 0.25em 0.5em;
-  border-width: 2px;
-  border-style: solid;
+  border: 2px solid black;
   background: rgba(255, 255, 255, 0.95);
   pointer-events: none;
   opacity: 0;
+  font-family: "Nunito", sans-serif;
 }
 
 .highlighted {
@@ -422,12 +499,12 @@ i {
 }
 
 .legend-tooltip-name {
-  color: #a6a6a6;
+  color: #000;
   font-weight: bold;
 }
 .legend-tooltip-bucket,
 .legend-tooltip-total {
-  color: #a6a6a6;
+  color: #000;
 }
 
 .chart-tooltip .tooltip-desc,
@@ -441,9 +518,14 @@ i {
 }
 
 .legend-bars {
-  stroke: #fff;
+  stroke: #000000;
 }
 
 .legend-bars-label {
-  fill: #fff;
+  font-size: 0.8em;
+  fill: #000000;
+}
+
+.bars {
+  stroke: #000000;
 }

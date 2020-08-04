@@ -57,6 +57,9 @@
         const file_path_industry_json = "industry_json.json";
         const file_path_industries_sectors = "files_for_ppp_map/industry_sectors.csv";
         const zip_json = "zip_codes.json"
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const initState = urlParams.get('s')
 
         d3.csv(file_path_data).then(function(data) {
             d3.json(file_path_industry_json).then(function(industry_json) {
@@ -68,6 +71,7 @@
                         zip_json: zip_json,
                         industry_json: industry_json,
                         sectors: sectors,
+                        initState: initState,
                         height: "",
                         width: ""
                         });
