@@ -15,6 +15,7 @@ function loanMap(option) {
   var bar_options = { by: "city", aggregate: "percentage" };
   var drill_key = [];
   var drill_type = "city";
+  var checkbox_path = "files_for_ppp_map/check-solid.svg";
   var heatData,
     data,
     json_copy,
@@ -23,6 +24,66 @@ function loanMap(option) {
     featureCircle,
     global_drill_level,
     global_key;
+
+  const list_of_states = [
+    "AK",
+    "AL",
+    "AR",
+    "AS",
+    "AZ",
+    "CA",
+    "CO",
+    "CT",
+    "DC",
+    "DE",
+    "FL",
+    "GA",
+    "GU",
+    "HI",
+    "IA",
+    "ID",
+    "IL",
+    "IN",
+    "KS",
+    "KY",
+    "LA",
+    "MA",
+    "MD",
+    "ME",
+    "MI",
+    "MN",
+    "MO",
+    "MP",
+    "MS",
+    "MT",
+    "NC",
+    "ND",
+    "NE",
+    "NH",
+    "NJ",
+    "NM",
+    "NV",
+    "NY",
+    "OH",
+    "OK",
+    "OR",
+    "PA",
+    "PR",
+    "RI",
+    "SC",
+    "SD",
+    "TN",
+    "TX",
+    "UT",
+    "VA",
+    "VI",
+    "VT",
+    "WA",
+    "WI",
+    "WV",
+    "WY",
+    "XX",
+  ];
 
   // Tooltip
   const tooltip = d3.select(el).append("div").attr("class", "chart-tooltip");
@@ -51,7 +112,7 @@ function loanMap(option) {
   var top_bar_strip = topBar
     .append("div")
     .attr("class", "top-bar-strip")
-    .style("width", window.innerWidth + "px")
+    .style("width", window.innerWidth - 40 + "px")
     .style("height", "40px");
 
   top_bar_strip
@@ -81,7 +142,7 @@ function loanMap(option) {
     d3.select("#map")
       .style("left", "300px")
       .style("margin-top", "0px")
-      .style("width", window.innerWidth - 600 + "px");
+      .style("width", window.innerWidth - 630 + "px");
   } else {
     d3.select("#map").style("width", width + "px");
   }
@@ -157,6 +218,7 @@ function loanMap(option) {
       });
 
       reset();
+      zoom_to_state();
       updateBars();
     });
   }
@@ -193,7 +255,7 @@ function loanMap(option) {
 
   d3.select("#state-selector")
     .selectAll("a")
-    .data(["AK", "ID", "DC"])
+    .data(list_of_states)
     .enter()
     .append("text")
     .html(function (d) {
@@ -219,11 +281,11 @@ function loanMap(option) {
     .attr("width", 210)
     .attr("height", 124);
 
-  legendSVG
+  /*legendSVG
     .append("rect")
     .attr("width", 210)
     .attr("height", 124)
-    .attr("fill", "#EBEBEB");
+    .attr("fill", "#EBEBEB");*/
 
   var legend_examples = [0, 1, 2, 3, 4];
   var colors = ["#540D6E", "#EE4266", "#FFD23F", "#3A86FF", "#0EAD68"];
@@ -252,8 +314,8 @@ function loanMap(option) {
     .attr("fill", function (d) {
       return colors[d];
     })
-    .attr("x", 15)
-    .attr("width", 40)
+    .attr("x", 8)
+    .attr("width", 14)
     .attr("height", 14);
 
   legendSVG
@@ -265,7 +327,7 @@ function loanMap(option) {
     .attr("y", function (d) {
       return d * 22 + 22;
     })
-    .attr("x", 65)
+    .attr("x", 30)
     .text(function (d) {
       return loan_range[d];
     });
@@ -298,7 +360,7 @@ function loanMap(option) {
     return d.key;
   });
 
-  //sectors_array.unshift("All Sectors");
+  sectors_array.unshift("All Sectors");
 
   currently_selected = [];
   sectors_array.forEach(function (v) {
@@ -344,6 +406,21 @@ function loanMap(option) {
     });
 
   sector_picker
+    .append("image")
+    .attr("x", legendRectSize * 0.1)
+    .attr("y", legendRectSize * 0.1)
+    .attr("width", legendRectSize * 0.8)
+    .attr("fill", function () {
+      return "white";
+    })
+    .attr("xlink:href", function () {
+      return checkbox_path;
+    })
+    .on("click", function (d) {
+      manage_selection(d);
+    });
+
+  sector_picker
     .append("text")
     .attr("class", "sector-select-label")
     .attr("dx", legendRectSize + 7)
@@ -356,15 +433,23 @@ function loanMap(option) {
       }
     })
     .on("click", function (d) {
-      sector_select(d);
+      manage_selection(d);
     });
 
   function manage_selection(sector_choice) {
     const index = currently_selected.indexOf(sector_choice);
-    if (index >= 0) {
-      currently_selected.splice(index, 1);
+    if (sector_choice != "All Sectors") {
+      if (index >= 0) {
+        currently_selected.splice(index, 1);
+      } else {
+        currently_selected.push(sector_choice);
+      }
     } else {
-      currently_selected.push(sector_choice);
+      if (index >= 0) {
+        currently_selected = [];
+      } else {
+        currently_selected = sectors_array;
+      }
     }
 
     sector_picker.selectAll("rect").attr("fill", function (v) {
@@ -492,7 +577,7 @@ function loanMap(option) {
     .attr("class", "stats-bar-container")
     .style("height", window.innerHeight - 125 + "px");
 
-  barSVG = barContainer.append("svg").attr("width", 370);
+  barSVG = barContainer.append("svg").attr("width", 280);
 
   get_data(initState);
 
@@ -527,6 +612,20 @@ function loanMap(option) {
         return d3.ascending(loan_range.indexOf(a), loan_range.indexOf(b));
       })
       .entries(processed_data);
+
+    bar_data = bar_data.sort(function (a, b) {
+      if (bar_options.aggregate == "percentage") {
+        return d3.ascending(a.key, b.key);
+      } else {
+        a_val = d3.sum(a.values, function (v) {
+          return v.values.length;
+        });
+        b_val = d3.sum(b.values, function (v) {
+          return v.values.length;
+        });
+        return d3.descending(a_val, b_val);
+      }
+    });
 
     var statsHeight = 20 + (5 + 20) * bar_data.length;
 
@@ -574,7 +673,7 @@ function loanMap(option) {
               }
             }
           });
-          return 70 + bar_scale(+d.init);
+          return 100 + bar_scale(+d.init);
         })
         .attr("y", function (d) {
           return o * 25;
@@ -604,12 +703,16 @@ function loanMap(option) {
       .enter()
       .append("text")
       .attr("class", "bar-label")
-      .attr("x", 0)
+      .attr("x", 20)
       .attr("y", function (d, i) {
         return i * 25 + 15;
       })
       .text(function (d) {
-        return d.key;
+        if (d.key.length > 8) {
+          return d.key.substr(0, 6) + "...";
+        } else {
+          return d.key;
+        }
       })
       .style("cursor", "pointer");
   }
@@ -900,6 +1003,23 @@ function loanMap(option) {
           }
         }
       });
+  }
+
+  function zoom_to_state() {
+    var minLat = d3.min(filtered_data, function (v) {
+      return new L.LatLng(v.location[0], v.location[1]).lat;
+    });
+    var minLng = d3.min(filtered_data, function (v) {
+      return new L.LatLng(v.location[0], v.location[1]).lng;
+    });
+    var maxLat = d3.max(filtered_data, function (v) {
+      return new L.LatLng(v.location[0], v.location[1]).lat;
+    });
+    var maxLng = d3.max(filtered_data, function (v) {
+      return new L.LatLng(v.location[0], v.location[1]).lng;
+    });
+
+    map.flyTo([minLat + (maxLat - minLat) / 2, minLng + (maxLng - minLng) / 2]);
   }
 
   function reset() {

@@ -49,7 +49,6 @@
 }
 
 .stats-bar-container {
-  width: 380px;
   margin: 10px;
   overflow-y: hidden;
   overflow-x: hidden;
@@ -60,7 +59,7 @@
 }
 
 .stats-drill-city {
-  margin-left: 10px;
+  margin-left: 30px;
 }
 
 .stats-drill-item {
@@ -149,7 +148,7 @@
 }
 .bar-label-perc,
 .bar-label {
-  fill: #1a8fe3;
+  fill: #000;
   font-size: 13px;
 }
 
@@ -178,7 +177,7 @@
 
 .sidebar-container {
   font-family: "Nunito", sans-serif;
-  width: 300px;
+  width: 330px;
   background-color: #fff;
   z-index: 1000;
   position: absolute;
