@@ -142,7 +142,7 @@ function loanMap(option) {
     d3.select("#map")
       .style("left", "300px")
       .style("margin-top", "0px")
-      .style("width", window.innerWidth - 630 + "px");
+      .style("width", window.innerWidth - 640 + "px");
   } else {
     d3.select("#map").style("width", width + "px");
   }
@@ -711,7 +711,11 @@ function loanMap(option) {
         if (d.key.length > 8) {
           return d.key.substr(0, 6) + "...";
         } else {
-          return d.key;
+          if (bar_options.by == "zip") {
+            return d.key.slice(0, 5);
+          } else {
+            return d.key;
+          }
         }
       })
       .style("cursor", "pointer");
@@ -1227,23 +1231,18 @@ function loanMap(option) {
   }
 
   function doStuff(x, y) {
-    //console.log(e.latlng);
     // coordinates in tile space
     //var x = e.layerPoint.x;
     //var y = e.layerPoint.y;
-    //console.log([x, y]);
 
     // calculate point in xy space
     var pointXY = L.point(x, y);
-    //console.log("Point in x,y space: " + pointXY);
 
     // convert to lat/lng space
     var pointlatlng = map.layerPointToLatLng(pointXY);
     // why doesn't this match e.latlng?
-    //console.log("Point in lat,lng space: " + pointlatlng);
 
     var test = new L.LatLng(y, x);
-    //console.log(" test: " + test);
     return [test.lat, test.lng];
   }
 
