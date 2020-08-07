@@ -217,6 +217,10 @@ function loanMap(option) {
         reset();
       });
 
+      map.on("zoomend", function (e) {
+        reset();
+      });
+
       reset();
       zoom_to_state();
       updateBars();
@@ -1117,6 +1121,8 @@ function loanMap(option) {
       .style("top", topLeft[1] + "px");
 
     g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+
+    console.log("map._zoom", map._zoom);
 
     if (map._zoom < 7) {
       var heat = L.heatLayer(heatData, {
