@@ -214,7 +214,7 @@
   top: -10px;
   left: 20px;
   font-weight: bold;
-  font-size: 1.4em;
+  font-size: 1.2em;
 }
 
 .legend-area-title {
@@ -235,7 +235,7 @@
 .state-selection-label {
   color: #8f8f8f;
   font-weight: bold;
-  font-size: 1.4em;
+  font-size: 1.2em;
   position: relative;
   left: 20px;
   top: 0px;
@@ -268,14 +268,14 @@
 
 .sector-picker-svg {
   top: -5px;
-  left: -50px;
+  left: -40px;
   position: relative;
 }
 
 .sector-title {
   color: #8f8f8f;
   font-weight: bold;
-  font-size: 1.4em;
+  font-size: 1.2em;
   top: -460px;
   left: 20px;
   position: relative;
@@ -518,6 +518,7 @@ i {
 
 .legend-bars {
   stroke: #000000;
+  cursor: pointer;
 }
 
 .legend-bars-label {

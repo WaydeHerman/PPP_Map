@@ -300,6 +300,7 @@ function loanMap(option) {
     "$2-5 million",
     "$5-10 million",
   ];
+  current_loan_range_selected = [...loan_range];
   var loan_values = [0.035, 0.1, 0.2, 0.5, 1];
 
   var legendColorScale = d3.scaleOrdinal().domain(loan_range).range(colors);
@@ -320,7 +321,10 @@ function loanMap(option) {
     })
     .attr("x", 8)
     .attr("width", 14)
-    .attr("height", 14);
+    .attr("height", 14)
+    .on("click", function (d) {
+      manage_range_selection(loan_range[d]);
+    });
 
   legendSVG
     .selectAll(".legend-bars-label")
@@ -392,6 +396,9 @@ function loanMap(option) {
       var horz = 1;
       var vert = i * height + offset;
       return "translate(" + horz + "," + vert + ")";
+    })
+    .on("click", function (d) {
+      manage_selection(d);
     });
 
   sector_picker
@@ -404,9 +411,6 @@ function loanMap(option) {
     .style("stroke-width", 1)
     .attr("fill", function (d) {
       return "#000";
-    })
-    .on("click", function (d) {
-      manage_selection(d);
     });
 
   sector_picker
@@ -419,9 +423,6 @@ function loanMap(option) {
     })
     .attr("xlink:href", function () {
       return checkbox_path;
-    })
-    .on("click", function (d) {
-      manage_selection(d);
     });
 
   sector_picker
@@ -435,10 +436,25 @@ function loanMap(option) {
       } else {
         return d;
       }
-    })
-    .on("click", function (d) {
-      manage_selection(d);
     });
+
+  function manage_range_selection(loan_range_choice) {
+    const index = current_loan_range_selected.indexOf(loan_range_choice);
+    if (index >= 0) {
+      current_loan_range_selected.splice(index, 1);
+    } else {
+      current_loan_range_selected.push(loan_range_choice);
+    }
+    legendSVG.selectAll(".legend-bars").style("opacity", function (v) {
+      if (current_loan_range_selected.indexOf(loan_range[v]) >= 0) {
+        return 1;
+      } else {
+        return 0.4;
+      }
+    });
+    reset();
+    updateBars();
+  }
 
   function manage_selection(sector_choice) {
     const index = currently_selected.indexOf(sector_choice);
@@ -531,11 +547,16 @@ function loanMap(option) {
     .append("div")
     .attr("class", "stats-drill-item stats-drill-city")
     .style("background-color", "#0FAD68")
+    .style("font-weight", "bold")
     .html("By City")
     .on("click", function () {
       bar_options.by = "city";
-      d3.select(".stats-drill-zip").style("background-color", "transparent");
-      d3.select(".stats-drill-city").style("background-color", "#0FAD68");
+      d3.select(".stats-drill-zip")
+        .style("background-color", "transparent")
+        .style("font-weight", "normal");
+      d3.select(".stats-drill-city")
+        .style("background-color", "#0FAD68")
+        .style("font-weight", "bold");
       updateBars();
     });
 
@@ -545,8 +566,12 @@ function loanMap(option) {
     .html("By Zip")
     .on("click", function () {
       bar_options.by = "zip";
-      d3.select(".stats-drill-zip").style("background-color", "#0FAD68");
-      d3.select(".stats-drill-city").style("background-color", "transparent");
+      d3.select(".stats-drill-zip")
+        .style("background-color", "#0FAD68")
+        .style("font-weight", "bold");
+      d3.select(".stats-drill-city")
+        .style("background-color", "transparent")
+        .style("font-weight", "normal");
       updateBars();
     });
 
@@ -556,11 +581,12 @@ function loanMap(option) {
     .html("#")
     .on("click", function () {
       bar_options.aggregate = "count";
-      d3.select(".stats-drill-percentage").style(
-        "background-color",
-        "transparent"
-      );
-      d3.select(".stats-drill-count").style("background-color", "#0FAD68");
+      d3.select(".stats-drill-percentage")
+        .style("background-color", "transparent")
+        .style("font-weight", "normal");
+      d3.select(".stats-drill-count")
+        .style("background-color", "#0FAD68")
+        .style("font-weight", "bold");
       updateBars();
     });
 
@@ -568,11 +594,16 @@ function loanMap(option) {
     .append("div")
     .attr("class", "stats-drill-item-alt stats-drill-percentage")
     .style("background-color", "#0FAD68")
+    .style("font-weight", "bold")
     .html("%")
     .on("click", function () {
       bar_options.aggregate = "percentage";
-      d3.select(".stats-drill-percentage").style("background-color", "#0FAD68");
-      d3.select(".stats-drill-count").style("background-color", "transparent");
+      d3.select(".stats-drill-percentage")
+        .style("background-color", "#0FAD68")
+        .style("font-weight", "bold");
+      d3.select(".stats-drill-count")
+        .style("background-color", "transparent")
+        .style("font-weight", "normal");
       updateBars();
     });
 
@@ -596,9 +627,13 @@ function loanMap(option) {
       "$5-10 million",
     ];
 
-    var processed_data = data.filter(function (v) {
-      return list_of_naicscodes.indexOf(+v.NAICSCode) >= 0;
-    });
+    var processed_data = data
+      .filter(function (v) {
+        return list_of_naicscodes.indexOf(+v.NAICSCode) >= 0;
+      })
+      .filter(function (v) {
+        return current_loan_range_selected.indexOf(v.LoanRange) >= 0;
+      });
 
     bar_data = d3
       .nest()
@@ -1027,7 +1062,15 @@ function loanMap(option) {
       return new L.LatLng(v.location[0], v.location[1]).lng;
     });
 
-    map.flyTo([minLat + (maxLat - minLat) / 2, minLng + (maxLng - minLng) / 2]);
+    map.panTo([minLat + (maxLat - minLat) / 2, minLng + (maxLng - minLng) / 2]);
+
+    setTimeout(function () {
+      var test = map.getBoundsZoom([
+        [minLat, minLng],
+        [maxLat, maxLng],
+      ]);
+      map.setZoom(test);
+    }, 200);
   }
 
   function reset() {
@@ -1038,11 +1081,17 @@ function loanMap(option) {
       featureCircle.remove();
     }
 
-    filtered_data = data.filter(function (v) {
-      return (
-        list_of_naicscodes.indexOf(+v.NAICSCode) >= 0 //|| filter == "All Sectors"
-      );
-    });
+    filtered_data = data
+      .filter(function (v) {
+        return (
+          list_of_naicscodes.indexOf(+v.NAICSCode) >= 0 //|| filter == "All Sectors"
+        );
+      })
+      .filter(function (v) {
+        return (
+          current_loan_range_selected.indexOf(v.LoanRange) >= 0 //|| filter == "All Sectors"
+        );
+      });
 
     heatData = [];
     var loan_values = [0.035, 0.1, 0.2, 0.5, 1];
@@ -1121,8 +1170,6 @@ function loanMap(option) {
       .style("top", topLeft[1] + "px");
 
     g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-
-    console.log("map._zoom", map._zoom);
 
     if (map._zoom < 7) {
       var heat = L.heatLayer(heatData, {
