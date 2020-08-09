@@ -201,6 +201,8 @@ function loanMap(option) {
       // get coordinates for points
       data.forEach(function (v) {
         if (zip_json[+v.Zip]) {
+          v.added_distance = 2 + Math.random() * 7.5;
+          v.rand_direction = Math.random() * 6.28319;
           v.location = [zip_json[+v.Zip][0], zip_json[+v.Zip][1]];
           v.point = map.latLngToLayerPoint(
             new L.LatLng(v.location[0], v.location[1])
@@ -1074,6 +1076,14 @@ function loanMap(option) {
     }, 200);
   }
 
+  function add_jitter(point, added_distance, rand_direction) {
+    const change_x = Math.cos(rand_direction) * added_distance;
+    const change_y = Math.sin(rand_direction) * added_distance;
+    point.x += change_x;
+    point.y += change_y;
+    return point;
+  }
+
   function reset() {
     bounds_NE = map.getBounds()._northEast;
     bounds_SW = map.getBounds()._southWest;
@@ -1125,6 +1135,8 @@ function loanMap(option) {
       v.point = map.latLngToLayerPoint(
         new L.LatLng(v.location[0], v.location[1])
       );
+
+      v.point_jitter = add_jitter(v.point, v.added_distance, v.rand_direction);
       var tmp_val = doStuff(v.location[1], v.location[0]);
       tmp_val.push(loanHeatmapScale(v.LoanRange));
       var test = Math.round(loanHeatmapScale(v.LoanRange) / 0.035);
@@ -1142,19 +1154,19 @@ function loanMap(option) {
 
     var bounds = path.bounds(),
       topLeft = [
-        d3.min(data, function (v) {
-          return v.point.x;
+        d3.min(filtered_data, function (v) {
+          return v.point_jitter.x;
         }),
-        d3.min(data, function (v) {
-          return v.point.y;
+        d3.min(filtered_data, function (v) {
+          return v.point_jitter.y;
         }),
       ];
     bottomRight = [
-      d3.max(data, function (v) {
-        return v.point.x;
+      d3.max(filtered_data, function (v) {
+        return v.point_jitter.x;
       }),
-      d3.max(data, function (v) {
-        return v.point.y;
+      d3.max(filtered_data, function (v) {
+        return v.point_jitter.y;
       }),
     ];
 
@@ -1200,10 +1212,10 @@ function loanMap(option) {
           return legendColorScale(d.LoanRange);
         })
         .attr("cx", function (d) {
-          return d.point.x;
+          return d.point_jitter.x;
         })
         .attr("cy", function (d) {
-          return d.point.y;
+          return d.point_jitter.y;
         })
         .attr("r", point_width)
         .on("mouseover", function (d) {
